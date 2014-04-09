@@ -25,10 +25,20 @@ for i=1+ds:size(I,1)-ds
     i
     for j=1+ds:size(I,2)-ds
         pij=I(i-ds:i+ds,j-ds:j+ds);
-        As(i,j)=similarity(p1(:),pij(:),patches_principle',priorModel,para);
+        As(i-ds,j-ds)=similarity(p1(:),pij(:),patches_principle',priorModel,para);
     end
 end
+%%
 figure,imshow(As,[min(As(:)), max(As(:))]);
+axis on
+%%
+[~,u]=sort(-As(:));
+s=16;
+us=u(1:100);
+[ys,xs]=ind2sub(size(As),us);
+figure,imshow(I);
+hold on
+scatter(xs,ys,7,'r');
 %%
 figure,
 ds=(p_size-1)/2;
@@ -37,7 +47,7 @@ for i=1+ds:size(I,1)-ds
     i
     for j=1+ds:size(I,2)-ds
         pij=I(i-ds:i+ds,j-ds:j+ds);
-        Aq(i,j)=-sqrt(sum(sum((pij-p1).^2)));
+        Aq(i-ds,j-ds)=-sqrt(sum(sum((pij-p1).^2)));
     end
 end
 figure,imshow(Aq,[min(Aq(:)), max(Aq(:))]);
