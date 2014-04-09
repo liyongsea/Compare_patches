@@ -1,7 +1,7 @@
 function res=similarity(x1,x2,P,priorModel,para)
 % compute the likelyhood ratio using the prior Model
 %------------------
-%projet x1 x2 on the principal componant basis
+%projet x1 x2 (column vectors) on the principal componant basis
 cx1=P*x1;
 cx2=P*x2;
 diff_cx1=bsxfun(@minus,priorModel.c,cx1');
