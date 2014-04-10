@@ -258,29 +258,45 @@
   \end{split}
   \]
  \end{frame}
+\begin{frame}
+\frametitle{Likelihood method}
+ \scriptsize
+ {
+ \begin{enumerate}
+ \item Exhibit a statistical test to know if two patches are similar
+ \item We assume each patch $\mathbf{x}$ is issued from a noise-free patch $\theta$ with some noise. E.g., if the noise is normal, $\mathbf(x) = \theta + \mathbf{n}$ where $n \sim \mathcal{N}(0,\sigma)$
+ \item We consider and compare the null hypothesis $\mathcal{H}_0 : \theta_1=\theta2$ and the alternative hypothesis $\mathcal{H}_1 : \theta_1\neq\theta_2$
+ \end{enumerate}
+ }
+\end{frame}
+\begin{frame}
+\frametitle{Likelihood ratio}
+The Bayesian likelihood ratio considers a known prior
+\begin{align*}
+L_B(\mathbf{x_1},\mathbf{x_2})&=\frac{p(\mathbf{x_1},\mathbf{x_2};\mathcal{H}_0)}{p(\mathbf{x_1},\mathbf{x_2};\mathcal{H}_1)}\\
+&=\frac{\int p(\mathbf{x_1}|\mathbf{\theta_{12}}=t)p(\mathbf{x_2}|\mathbf{\theta_{12}}=t)p(\mathbf{\theta_{12}}=\mathbf{t})\mathrm{d}\mathbf{t}}{\prod_{i=1,2}\int p(\mathbf{x_i}|\mathbf{\theta_i})\mathbf{t_i})p(\mathbf{\theta_i}=\mathbf{t_i})\mathrm{d}\mathbf{t_i}}
+\end{align*}
+The prior can be non-informative, such as a Jeffreys prior.
+\end{frame}
 
- 
-% \begin{frame}
-%  \frametitle{Conclusion}
-%  \begin{itemize}
-%   \item Planar mirror calibration : [Sturm & Bonfort 2006] [R. Kumar \textit{et al.} 2008], [Rodrigues \textit{et al.} 2010] 
-%   \begin{itemize}
-%    \item Simple acquisition device and fast feature detection (could be used on random planar pattern)
-%    \item efficient algorithm and fast resolution
-%    \item minimum 3 views are required
-%    \item less precise in translation estimation  
-%   \end{itemize}
-%   \item Spherical mirror calibration : [Agrawal 2013]
-%  \begin{itemize}
-%    \item 1 view calibration without ambiguity
-%    \item higher precision
-%    \item more complex device
-%    \item sophistic feature detection method
-%   \end{itemize}
-%  \end{itemize}
-% 
-% \end{frame}
+\begin{frame}
+\frametitle{Likelihood ratio}
+The generalized likelihood ratio uses the maximum likelihood estimates for the noise-free patches.
+\[
+L_G(\mathbf{x_1},\mathbf{x_2})=\frac{\sup_\mathbf{t}p(\mathbf{x_1},\mathbf{x_2};\theta_{12}=\mathbf{t},\mathcal{H}_0)}{\prod_{i=1,2}\sup_\mathbf{t_i}p(\mathbf{x_i};\mathbf{\theta_i}=\mathbf{t_i}}
+\]
+This comes down to using euclidian distance when the prior is non-informative.
+\end{frame}
 
+\begin{frame}
+\frametitle{Likelihood ratio}
+The generalized likelihood ratio uses the maximum likelihood estimates for the noise-free patches.
+\[
+L_G(\mathbf{x_1},\mathbf{x_2})=\frac{\sup_\mathbf{t}p(\mathbf{x_1},\mathbf{x_2};\theta_{12}=\mathbf{t},\mathcal{H}_0)}{\prod_{i=1,2}\sup_\mathbf{t_i}p(\mathbf{x_i};\mathbf{\theta_i}=\mathbf{t_i}}
+\]
+This comes down to using euclidian distance when the prior is non-informative.
+\end{frame}
+  
   \begin{frame}
    {\Huge
      \vspace {0.15\textwidth}
