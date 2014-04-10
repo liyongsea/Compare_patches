@@ -1,0 +1,330 @@
+% chinthakawk@gmail.com
+
+\documentclass[compress]{beamer} %this is to use copressed header from the
+\usepackage{beamerthemeshadow} %our theme, later you can change it
+\usepackage[frenchb]{babel}
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage[utf8]{inputenc}
+\usepackage[lined,boxed]{algorithm2e}
+\usepackage[all]{xy}
+\usepackage{animate} %need the animate.sty file
+\graphicspath{{./Pictures/}} 
+% editing header
+\setbeamertemplate{headline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1.8ex,leftskip=1em,left]{section in head/foot}%
+    \usebeamerfont{subsection in head/foot}\hspace*{5ex}\insertsectionhead
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1.8ex,left,leftskip=1em]{subsection in head/foot}%
+    \usebeamerfont{section in head/foot}\insertshorttitle\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+% editing footer
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,right]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor\hspace*{2ex}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\definecolor{orange}{rgb}{1,0.5,0}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+
+\def\etal{et al.\ }
+\def\ie{i.e.\ }
+\def\eg{e.g.\ }
+
+%put a wide hat over the argumetn
+\newcommand{\lift}[1]{\ensuremath{\widehat{#1}}}
+
+%put a wide hat over the argumetn
+%\newcommand{\lifto}[1]{\ensuremath{\check{#1}}}
+\newcommand{\lifto}[1]{\ensuremath{\overset{_{_{\circ}}}{#1}}}
+
+
+% stack vector
+\newcommand{\stackv}[1]{\ensuremath{\vet{v}\left( {#1} \right)}}
+\newcommand{\ustackv}[1]{\ensuremath{\inv{\vet{v}}\left( {#1} \right)}}
+
+% symmetric stack vector
+\newcommand{\stackvs}[1]{\ensuremath{\vet{v}_{\textit{sym}}\left( {#1} \right)}}
+
+% Matrix Lifting: put a wide hat over the argument intended to be a matrix
+\newcommand{\mlift}[1]{\ensuremath{\lift{\mat{#1}}}}
+\newcommand{\mlifto}[1]{\ensuremath{\lifto{\mat{#1}}}}
+
+% Vector Lifting: put a wide hat over the argument intended to be a matrix
+\newcommand{\vlift}[1]{\ensuremath{\lift{\vet{#1}}}}
+\newcommand{\vlifto}[1]{\ensuremath{\lifto{\vet{#1}}}}
+
+\newcommand{\bmat}[1]{\ensuremath{\begin{bmatrix} #1 \end{bmatrix}}}
+% Vector: print the argument as a vector
+\newcommand{\vet}[1]{\ensuremath{\mathbf{#1}}}
+
+% Matrix: print the argument as a matrix
+\newcommand{\mat}[1]{\ensuremath{\,\mathtt{#1}\,}}
+
+% Inverse: print a -1 on the top right of the argument 
+\newcommand{\inv}[1]{\ensuremath{{#1}^{\text{-}1}}}
+
+% Inverse: print a -1 on the top right of the argument 
+\newcommand{\minv}[1]{\ensuremath{\mat{{#1}}^{\text{-}1}}}
+
+% Transpose: print a T on the top right of the argument 
+\newcommand{\tra}[1]{\ensuremath{{#1}^{\!\mathsf{T}}}}
+
+% Transpose Matrix: print a T on the top right of the argument intended to be a matrix 
+\newcommand{\mtra}[1]{\ensuremath{\tra{\mat{#1}}}}
+
+% Transpose Vector: print a T on the top right of the argument intended to be a vector
+\newcommand{\vtra}[1]{\ensuremath{\tra{\vet{#1}}}}
+
+% minus transpose:  print a -T on the top right of the argument
+\newcommand{\ment}[1]{\ensuremath{{#1}^{\text{-}\mathsf{T}}}}
+
+% minus transpose matrix:  print a -T on the top right of the argument
+\newcommand{\mment}[1]{\ensuremath{{\mat{#1}}^{\text{-}\mathsf{T}}}}
+
+% Cross Matrix:  print the argument in the cross matrix notation
+\newcommand{\crmat}[1]{\ensuremath{\left[{#1}\right]_{\times}}}
+
+\newcommand{\mattwoone}[2]{\ensuremath{\left( \begin{array}{c} #1 \\ #2 \\ \end{array} \right)}}
+
+\newcommand{\mattwotwo}[4]{\ensuremath{\left( \! \begin{array}{cc} #1 & #2 \\ #3 & #4 \\ \end{array} \! \right)}}
+
+\newcommand{\matthreethree}[9]{\ensuremath{\left( \begin{array}{ccc} #1 & #2 & #3 \\ #4 & #5 & #6 \\ #7 & #8 & #9 \\ \end{array} \right)}}
+
+
+
+\newcommand{\testmath}[1]{\mathrm{#1} \mathit{#1} \mathbf{#1} \mathsf{#1} \mathtt{#1} \mathcal{#1} \mathbb{#1} \mathfrak{#1}} 
+
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\Vi}{\ensuremath{\mat{V}_{\!i}}}
+\newcommand{\VF}{\ensuremath{\mat{V}^{\!F}}}
+\newcommand{\VB}{\ensuremath{\mat{V}^{\!B}}}
+\newcommand{\VirtualF}[1]{\ensuremath{\hat{\mat{#1}}^{\!F}}}
+\newcommand{\VirtualB}[1]{\ensuremath{\hat{\mat{#1}}^{\!B}}}
+\newcommand{\VFi}{\ensuremath{\mat{V}^{\!F}_{\!i}}}
+\newcommand{\VBi}{\ensuremath{\mat{V}^{\!B}_{\!i}}}
+\newcommand{\VirtualFi}[1]{\ensuremath{\hat{\mat{#1}}^{\!F}_{\!i}}}
+\newcommand{\VirtualBi}[1]{\ensuremath{\hat{\mat{#1}}^{\!B}_{\!i}}}
+
+\newcommand{\Center}{\ensuremath{\vet{C}}}
+\newcommand{\mirror}{\ensuremath{\mat{\Pi}}}
+
+%enable numbering captions for the images
+\setbeamertemplate{caption}[numbered]
+
+%begining of the doc
+\begin{document}
+
+ \title{Statistic Criterion for Patch Comparison}  
+ %\author{Jia LI}
+ %\date{August, 2013} 
+
+ %title page
+ \begin{frame}
+\titlepage
+    \centering
+    \begin{minipage}{0.4\textwidth}
+    \begin{flushleft} \large
+    \emph{Author:}\\
+    Dalens Théophile\\
+    LI Jia\\
+    
+    \end{flushleft}
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+    \begin{flushright} \large
+    \emph{Course:}\\
+    Imagerie Satellitaire
+    \end{flushright}
+    \end{minipage}\\[3cm]
+ \end{frame}
+ \section{Introduction}
+ \begin{frame}
+  \frametitle{Introduction}
+	\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.7\linewidth}
+	\includegraphics[width=\linewidth]{lena}
+	\end{minipage}
+	    \caption{Example of application of such techniques}
+	\end{figure}
+ \end{frame}
+
+ %ToC page
+ \begin{frame}
+ \scriptsize
+ {
+ \begin{enumerate}
+
+
+  \item \textbf{A contrario method}
+  \begin{enumerate}
+   \item Modeling
+   \item Statistic
+   \item Approach
+   
+  \end{enumerate}
+
+  \item Likelihood ratio
+  \item Likelihood ratio with learned prior
+  \item Comparison
+  
+ \end{enumerate}
+
+  %\frametitle{Table of contents}
+  %\tableofcontents
+  
+ }
+ \end{frame} 
+ 
+ \section{A contrario Method}
+ \begin{frame}
+  \frametitle{Modeling}
+  A patch is considered as a random variable $\mathbb{B}=c_i \mat{B}_i$ a linear combination of reference patches, where $c_i$ are independent random variable following a distribution $h_i$.
+	\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.4\linewidth}
+	\includegraphics[width=\linewidth]{zebra.jpg}
+	  
+	\end{minipage}
+	\begin{minipage}{0.4\linewidth}
+	\includegraphics[width=\linewidth]{princomp_zebra.png}
+    
+	\end{minipage}
+	    \caption{Left: A natural image; right: reference patches}
+	
+	\end{figure}      
+ \end{frame}
+ \begin{frame}
+  \frametitle{Modeling}
+  A patch is considered as a random variable $\mathbb{B}=c_i \mat{B}_i$ a linear combination of reference patches, where $c_i$ are independent random variable following a distribution $h_i$.
+	\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.4\linewidth}
+	\includegraphics[width=\linewidth]{lena}
+	  
+	\end{minipage}
+	\begin{minipage}{0.4\linewidth}
+	\includegraphics[width=\linewidth]{princomp_lena.png}
+    
+	\end{minipage}
+	    \caption{Left: A natural image; right: reference patches}
+	
+	\end{figure}      
+ \end{frame}
+  \begin{frame}
+  \frametitle{Modeling}
+	\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.8\linewidth}
+	\includegraphics[width=\linewidth]{hist}
+	  
+	\end{minipage}
+
+	    \caption{Distribution of the firsts components}
+	
+	\end{figure}      
+ \end{frame}
+ 
+ \section{Likelihood ration with learned prior}
+ \begin{frame}
+ \scriptsize
+ {
+ \begin{enumerate}
+
+
+  \item A contrario method
+  \item Likelihood ratio
+  \item \textbf{Likelihood ratio with learned prior}
+  \begin{enumerate}
+   \item motivation
+   \item approach
+   \item result
+  \end{enumerate}
+
+  \item Comparison
+  
+ \end{enumerate}
+
+  %\frametitle{Table of contents}
+  %\tableofcontents
+  
+ }
+ \end{frame} 
+ 
+ \begin{frame}
+  \frametitle{Approach}
+  likelihood ratio :
+  \[
+  \begin{split}
+   P(x_1,x_2 \arrowvert \mathcal{H}_0)&=\int P(x_1 \arrowvert \theta_{12}) P(x_2 \arrowvert \theta_{12}) p(\theta_{12}) d\theta_{12}
+  \end{split}
+  \]
+  
+  \[
+  \begin{split}
+   p(\theta_{12}) d\theta_{12}=\prod_i h_i(c_i)dc_i
+  \end{split}
+  \]
+ \end{frame}
+
+ 
+% \begin{frame}
+%  \frametitle{Conclusion}
+%  \begin{itemize}
+%   \item Planar mirror calibration : [Sturm & Bonfort 2006] [R. Kumar \textit{et al.} 2008], [Rodrigues \textit{et al.} 2010] 
+%   \begin{itemize}
+%    \item Simple acquisition device and fast feature detection (could be used on random planar pattern)
+%    \item efficient algorithm and fast resolution
+%    \item minimum 3 views are required
+%    \item less precise in translation estimation  
+%   \end{itemize}
+%   \item Spherical mirror calibration : [Agrawal 2013]
+%  \begin{itemize}
+%    \item 1 view calibration without ambiguity
+%    \item higher precision
+%    \item more complex device
+%    \item sophistic feature detection method
+%   \end{itemize}
+%  \end{itemize}
+% 
+% \end{frame}
+
+  \begin{frame}
+   {\Huge
+     \vspace {0.15\textwidth}
+     \begin{columns}[ccc]
+       \begin{column}{0.3\textwidth}
+       \end{column}
+       \begin{column}{0.3\textwidth}
+        \text{Thank you!}
+       \end{column}
+       \begin{column}{0.3\textwidth}
+       \end{column}
+     \end{columns}
+   }
+   \vspace {0.025\textwidth}
+   \begin{center}
+   {\huge Q\&A}
+   \end{center}
+ \end{frame}
+  
+\end{document}
