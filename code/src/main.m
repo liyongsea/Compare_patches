@@ -23,8 +23,8 @@ for i=1:6
 subplot(2,3,i) 
 hist(coeff_proj(:,i)./sum(coeff_proj(:,i)),255)
 end
-%%
-Y=coeff_proj(:,5);
+%% approximate the hist distribution by a gaussian
+Y=coeff_proj(:,1);
 m=estimateGaussian(Y);
 x=[-2:0.01:2]';
 figure,[h1,c1]=hist(Y,255)
@@ -33,7 +33,7 @@ drawGaussianMixture(m,x)
 %% estimate componant's distibution
 resolution = 100;
 [h c]=estimCom(coeff_proj,resolution);
-
+[mu var]=estimGaussianCom(coeff_proj);
 %% compare patches
 P=patches_principle';
 x1=zeros(p_size*p_size,1);
@@ -42,9 +42,14 @@ x2=zeros(p_size*p_size,1);
 x2(2)=1;
 compareproba( x1,x2,coeff_proj,0.03,255 )
 %%
+% a contrario pior
 priorModel.h=h;
 priorModel.c=c;
+% pior approximated by a gaussian
+priorModel_gau.mu=mu;
+priorModel_gau.var=var;
 para.sigma=0.5;
 px1=patches_principle*x1;
 px2=patches_principle*x2;
 similarity(px1,px2,P,priorModel,para)
+similarity_gau_approx(px1,px2,P,priorModel_gau,para)

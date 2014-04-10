@@ -6,5 +6,5 @@ BI=Id(idxs);
 TD=(1:numel(idxs))'-cumsum(BI);
 FA=cumsum(BI);
 FA=FA/nb;
-TD=TD/(nb*(nb-1))
+TD=TD/(nb*(nb-1));
 end

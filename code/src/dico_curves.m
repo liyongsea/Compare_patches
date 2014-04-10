@@ -4,7 +4,7 @@ function [ M ] = dico_curves( dico1,dico2,compare,color )
 nb=size(dico1,2);
 M=zeros(nb,nb);
 for i=1:nb
-   i
+   i;
     for j=1:nb
         M(i,j)=compare(dico1(:,i),dico2(:,j));
     end
