@@ -5,8 +5,9 @@ rng('default');
 %%
 dataPath='../../data/%s';
 %I=imread('/home/li/MVA/Graphcut_shadow/data/toulouse1_qb.gif');
-I=imread(sprintf(dataPath,'zebra.jpg'));
+I=imread(sprintf(dataPath,'lena.bmp'));
 I=rgb2gray(I);
+%I=0.5+randn(size(I));
 I=imresize(I,0.5);
 figure(),imshow(I);
 I=double(I)/255;
@@ -17,9 +18,20 @@ patches=extractPatches(I,p_size*p_size);
 [patches_principle,coeff_proj]=princomp(patches);
 showPatches(patches_principle);
 %%
-figure,hist(coeff_proj(:,1),255)
+figure,
+for i=1:6
+subplot(2,3,i) 
+hist(coeff_proj(:,i)./sum(coeff_proj(:,i)),255)
+end
+%%
+Y=coeff_proj(:,5);
+m=estimateGaussian(Y);
+x=[-2:0.01:2]';
+figure,[h1,c1]=hist(Y,255)
+hold on,plot(c1,h1./trapz(c1,h1),'-b')
+drawGaussianMixture(m,x)
 %% estimate componant's distibution
-resolution = 255;
+resolution = 100;
 [h c]=estimCom(coeff_proj,resolution);
 
 %% compare patches
