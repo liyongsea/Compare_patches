@@ -1,6 +1,7 @@
 % chinthakawk@gmail.com
 
 \documentclass[compress]{beamer} %this is to use copressed header from the
+\usepackage{etex}
 \usepackage{beamerthemeshadow} %our theme, later you can change it
 \usepackage[frenchb]{babel}
 \usepackage{fancyhdr} % Required for custom headers
@@ -8,7 +9,7 @@
 \usepackage[lined,boxed]{algorithm2e}
 \usepackage[all]{xy}
 \usepackage{animate} %need the animate.sty file
-\graphicspath{{./Pictures/}} 
+\graphicspath{{./Figure/}} 
 % editing header
 \setbeamertemplate{headline}
 {
@@ -98,34 +99,6 @@
 
 % Cross Matrix:  print the argument in the cross matrix notation
 \newcommand{\crmat}[1]{\ensuremath{\left[{#1}\right]_{\times}}}
-
-\newcommand{\mattwoone}[2]{\ensuremath{\left( \begin{array}{c} #1 \\ #2 \\ \end{array} \right)}}
-
-\newcommand{\mattwotwo}[4]{\ensuremath{\left( \! \begin{array}{cc} #1 & #2 \\ #3 & #4 \\ \end{array} \! \right)}}
-
-\newcommand{\matthreethree}[9]{\ensuremath{\left( \begin{array}{ccc} #1 & #2 & #3 \\ #4 & #5 & #6 \\ #7 & #8 & #9 \\ \end{array} \right)}}
-
-
-
-\newcommand{\testmath}[1]{\mathrm{#1} \mathit{#1} \mathbf{#1} \mathsf{#1} \mathtt{#1} \mathcal{#1} \mathbb{#1} \mathfrak{#1}} 
-
-\DeclareMathOperator{\diag}{diag}
-\DeclareMathOperator{\rank}{rank}
-\DeclareMathOperator{\Tr}{Tr}
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\argmax}{arg\,max}
-\newcommand{\Vi}{\ensuremath{\mat{V}_{\!i}}}
-\newcommand{\VF}{\ensuremath{\mat{V}^{\!F}}}
-\newcommand{\VB}{\ensuremath{\mat{V}^{\!B}}}
-\newcommand{\VirtualF}[1]{\ensuremath{\hat{\mat{#1}}^{\!F}}}
-\newcommand{\VirtualB}[1]{\ensuremath{\hat{\mat{#1}}^{\!B}}}
-\newcommand{\VFi}{\ensuremath{\mat{V}^{\!F}_{\!i}}}
-\newcommand{\VBi}{\ensuremath{\mat{V}^{\!B}_{\!i}}}
-\newcommand{\VirtualFi}[1]{\ensuremath{\hat{\mat{#1}}^{\!F}_{\!i}}}
-\newcommand{\VirtualBi}[1]{\ensuremath{\hat{\mat{#1}}^{\!B}_{\!i}}}
-
-\newcommand{\Center}{\ensuremath{\vet{C}}}
-\newcommand{\mirror}{\ensuremath{\mat{\Pi}}}
 
 %enable numbering captions for the images
 \setbeamertemplate{caption}[numbered]
@@ -311,7 +284,7 @@
   \begin{frame}
    {\Huge
      \vspace {0.15\textwidth}
-     \begin{columns}[ccc]
+     \begin{columns}
        \begin{column}{0.3\textwidth}
        \end{column}
        \begin{column}{0.3\textwidth}
