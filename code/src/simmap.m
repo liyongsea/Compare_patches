@@ -1,3 +1,5 @@
+close all
+clear all
 I=imread('../../data/lena.bmp');
 I=double(rgb2gray(I))/255.;
 %% noise image
@@ -17,59 +19,13 @@ resolution=255;
 [h c]=estimCom(coeff_proj,resolution);
 priorModel.h=h;
 priorModel.c=c;
-para.sigma=0.01;
+para.sigma=0.1;
 %% extract an original patch
 p1=I(323:329,323:329);
 figure,imshow(p1);
-%%
-compare=@(p,q)(similarity(p(:),q(:),patches_principle',priorModel,para));
-Aq=show_best_matches(I,p1,compare);
-%%
-compare=@(p,q)(-sqrt(sum(sum((p-q).^2))));
-As=show_best_matches(I,p1,compare);
-%%
-dico=load('../../data/dico_for_gamma_L1.62.mat');
-dico=dico.dico;
-dico=dico/255;
-nb=196;
-%%
-sigma=0.3;
-para.sigma = sigma;
-dico1=dico+randn(size(dico))*sigma;
-dico1(dico1<0)=0;
-dico1(dico1>1)=1;
-dico2=dico+randn(size(dico))*sigma;
-dico2(dico2<0)=0;
-dico2(dico2>1)=1;
-%%
-M1=zeros(nb,nb);
-M2=zeros(nb,nb);
-for i=1:nb
-    i
-    for j=1:nb
-        M1(i,j)=similarity(dico1(:,i),dico2(:,j),patches_principle',priorModel,para);
-        M2(i,j)=-sum((dico1(:,i)-dico2(:,j)).^2);
-    end
-end
-%%
-figure,
-sim=@(d1,d2)similarity(d1,d2,patches_principle',priorModel,para);
-dico_curves(dico1,dico2,sim,'r');
-hold on
-euc=@(d1,d2)(-sum((d1-d2).^2));
-dico_curves(dico1,dico2,euc,'b');
-
-%%
-[~,idxs]=sort(M1(:));
-Id=eye(nb);
-BI=Id(idxs);
-TD=(1:numel(idxs))'-cumsum(BI);
-FA=cumsum(BI);
-figure,plot(FA/nb,TD/(nb*(nb-1)),'r');
-hold on
-[~,idxs]=sort(M2(:));
-Id=eye(nb);
-BI=Id(idxs);
-TD=(1:numel(idxs))'-cumsum(BI);
-FA=cumsum(BI);
-plot(FA/nb,TD/(nb*(nb-1)),'b');
+%% show best matches found in reference image
+compare_sim=@(p,q)(similarity(p(:),q(:),patches_principle',priorModel,para));
+% Aq=show_best_matches(I,p1,compare_sim);
+% 
+compare_euclid=@(p,q)(-sqrt(sum(sum((p-q).^2))));
+% As=show_best_matches(I,p1,compare_euclid);
