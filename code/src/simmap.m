@@ -1,13 +1,13 @@
 I=imread('../../data/lena.bmp');
 I=double(rgb2gray(I))/255.;
-%%
+%% noise image
 I=I+randn(size(I))/10;
 I(I<0)=0; I(I>1)=1;
 %%
 figure,imshow(I);
 
 %% extract patches
-p_size=7;
+p_size=8;
 patches=extractPatches(I,p_size*p_size);
 
 [patches_principle,coeff_proj]=princomp(patches);
@@ -51,6 +51,14 @@ for i=1:nb
         M2(i,j)=-sum((dico1(:,i)-dico2(:,j)).^2);
     end
 end
+%%
+figure,
+sim=@(d1,d2)similarity(d1,d2,patches_principle',priorModel,para);
+dico_curves(dico1,dico2,sim,'r');
+hold on
+euc=@(d1,d2)(-sum((d1-d2).^2));
+dico_curves(dico1,dico2,euc,'b');
+
 %%
 [~,idxs]=sort(M1(:));
 Id=eye(nb);
