@@ -1,0 +1,174 @@
+% last updated in April 2002 by Antje Endemann
+% Based on CVPR 07 and LNCS, with modifications by DAF, AZ and elle, 2008 and AA, 2010, and CC, 2011; TT, 2014
+
+\documentclass[runningheads]{llncs}
+\usepackage[width=122mm,left=12mm,paperwidth=146mm,height=193mm,top=12mm,paperheight=217mm]{geometry}
+
+\usepackage{graphicx}
+
+\usepackage{amsmath,amssymb} % define this before the line numbering.
+\usepackage{ruler}
+\usepackage{color}
+% \usepackage{subfigure}
+% 
+% \usepackage{setspace}
+\usepackage{algorithm}
+\usepackage{epsfig}
+% \usepackage[noend]{algorithmic}
+% \newtheorem{thm}{Theorem}
+
+\definecolor{orange}{rgb}{1,0.5,0}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+
+\def\etal{et al.\ }
+\def\ie{i.e.\ }
+\def\eg{e.g.\ }
+
+%put a wide hat over the argumetn
+\newcommand{\lift}[1]{\ensuremath{\widehat{#1}}}
+
+%put a wide hat over the argumetn
+%\newcommand{\lifto}[1]{\ensuremath{\check{#1}}}
+\newcommand{\lifto}[1]{\ensuremath{\overset{_{_{\circ}}}{#1}}}
+
+
+% stack vector
+\newcommand{\stackv}[1]{\ensuremath{\vet{v}\left( {#1} \right)}}
+\newcommand{\ustackv}[1]{\ensuremath{\inv{\vet{v}}\left( {#1} \right)}}
+
+% symmetric stack vector
+\newcommand{\stackvs}[1]{\ensuremath{\vet{v}_{\textit{sym}}\left( {#1} \right)}}
+
+% Matrix Lifting: put a wide hat over the argument intended to be a matrix
+\newcommand{\mlift}[1]{\ensuremath{\lift{\mat{#1}}}}
+\newcommand{\mlifto}[1]{\ensuremath{\lifto{\mat{#1}}}}
+
+% Vector Lifting: put a wide hat over the argument intended to be a matrix
+\newcommand{\vlift}[1]{\ensuremath{\lift{\vet{#1}}}}
+\newcommand{\vlifto}[1]{\ensuremath{\lifto{\vet{#1}}}}
+
+\newcommand{\bmat}[1]{\ensuremath{\begin{bmatrix} #1 \end{bmatrix}}}
+% Vector: print the argument as a vector
+\newcommand{\vet}[1]{\ensuremath{\mathbf{#1}}}
+
+% Matrix: print the argument as a matrix
+\newcommand{\mat}[1]{\ensuremath{\,\mathtt{#1}\,}}
+
+% Inverse: print a -1 on the top right of the argument 
+\newcommand{\inv}[1]{\ensuremath{{#1}^{\text{-}1}}}
+
+% Inverse: print a -1 on the top right of the argument 
+\newcommand{\minv}[1]{\ensuremath{\mat{{#1}}^{\text{-}1}}}
+
+% Transpose: print a T on the top right of the argument 
+\newcommand{\tra}[1]{\ensuremath{{#1}^{\!\mathsf{T}}}}
+
+% Transpose Matrix: print a T on the top right of the argument intended to be a matrix 
+\newcommand{\mtra}[1]{\ensuremath{\tra{\mat{#1}}}}
+
+% Transpose Vector: print a T on the top right of the argument intended to be a vector
+\newcommand{\vtra}[1]{\ensuremath{\tra{\vet{#1}}}}
+
+% minus transpose:  print a -T on the top right of the argument
+\newcommand{\ment}[1]{\ensuremath{{#1}^{\text{-}\mathsf{T}}}}
+
+% minus transpose matrix:  print a -T on the top right of the argument
+\newcommand{\mment}[1]{\ensuremath{{\mat{#1}}^{\text{-}\mathsf{T}}}}
+
+% Cross Matrix:  print the argument in the cross matrix notation
+\newcommand{\crmat}[1]{\ensuremath{\left[{#1}\right]_{\times}}}
+
+\newcommand{\mattwoone}[2]{\ensuremath{\left( \begin{array}{c} #1 \\ #2 \\ \end{array} \right)}}
+
+\newcommand{\mattwotwo}[4]{\ensuremath{\left( \! \begin{array}{cc} #1 & #2 \\ #3 & #4 \\ \end{array} \! \right)}}
+
+\newcommand{\matthreethree}[9]{\ensuremath{\left( \begin{array}{ccc} #1 & #2 & #3 \\ #4 & #5 & #6 \\ #7 & #8 & #9 \\ \end{array} \right)}}
+
+\newcommand{\Vi}{\ensuremath{\mat{V}_{\!i}}}
+\newcommand{\VF}{\ensuremath{\mat{V}^{\!F}}}
+\newcommand{\VB}{\ensuremath{\mat{V}^{\!B}}}
+\newcommand{\VirtualF}[1]{\ensuremath{\hat{\mat{#1}}^{\!F}}}
+\newcommand{\VirtualB}[1]{\ensuremath{\hat{\mat{#1}}^{\!B}}}
+\newcommand{\VFi}{\ensuremath{\mat{V}^{\!F}_{\!i}}}
+\newcommand{\VBi}{\ensuremath{\mat{V}^{\!B}_{\!i}}}
+\newcommand{\VirtualFi}[1]{\ensuremath{\hat{\mat{#1}}^{\!F}_{\!i}}}
+\newcommand{\VirtualBi}[1]{\ensuremath{\hat{\mat{#1}}^{\!B}_{\!i}}}
+\newcommand{\Si}{\ensuremath{\mat{S}_{\!i}}}
+\newcommand{\Center}{\ensuremath{\vet{C}}}
+\newcommand{\mirror}{\ensuremath{\mat{\Pi}}}
+
+\newcommand{\testmath}[1]{\mathrm{#1} \mathit{#1} \mathbf{#1} \mathsf{#1} \mathtt{#1} \mathcal{#1} \mathbb{#1} \mathfrak{#1}} 
+
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+\newcommand{\todo}[1]{\fbox{\textcolor{red}{\textbf{ TODO: #1}}} \\}
+\newcommand{\comment}[1]{{\small{\textsl{\textcolor{darkblue}{/* #1 */}}}}}
+\newcommand{\draft}[1]{{\footnotesize{\textbf{\textcolor{blue}{Short version : compiling skipped}}}} \\}
+\newcommand{\toadd}[1]{{\textbf{\textcolor{orange}{[ADD: #1]}}}}
+
+\begin{document}
+% \renewcommand\thelinenumber{\color[rgb]{0.2,0.5,0.8}\normalfont\sffamily\scriptsize\arabic{linenumber}\color[rgb]{0,0,0}}
+% \renewcommand\makeLineNumber {\hss\thelinenumber\ \hspace{6mm} \rlap{\hskip\textwidth\ \hspace{6.5mm}\thelinenumber}}
+% \linenumbers
+\pagestyle{headings}
+\mainmatter
+\def\ECCV14SubNumber{979}  % Insert your submission number here
+
+% \title{Geometric Extrinsic Calibration of Mobile Devices using a Planar Mirror:\\ Screen, Front and Rear Cameras} % Replace with your title
+% \title{Screen, Front and Rear Cameras: How to Calibrate the Pose of your Smartphone?} % Replace with your title
+% \title{Geometric Extrinsic Calibration of a Smartphone} % Replace with your title
+% \title{How to Calibrate the Cameras of a Smartphone w.r.t its Screen?} % Replace with your title
+\title{Statistic Criterion for Patch Comparison} % Replace with your title
+
+\titlerunning{ECCV-14 submission ID \ECCV14SubNumber}
+
+\authorrunning{ECCV-14 submission ID \ECCV14SubNumber}
+
+\author{Anonymous ECCV submission}
+\institute{Paper ID \ECCV14SubNumber}
+
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+
+\section{Introduction}
+
+zerrrrrrrrrrrrrrrrrrrrrf
+\subsection{Related Work}
+
+\subsection{Contributions}
+
+\subsection{Models and Notations}
+
+
+\section{Likelihood Ratio for Patch Comparison}
+\subsection{Statistic Criterion for Patch Comparison}
+\subsection{Likelihood Ratio and General Approach}
+
+\section{A Contrario Model for Prior Learning}
+\subsection{A Contrario Method}
+\subsection{Model and Statistic}
+
+\section{Likelihood Ratio with A Contrario Prior}
+\subsection{Model}
+\subsection{Studying}
+
+\section{Experiments}
+\subsection{Statistic Similarity for Non Local Means Denoising}
+\subsection{PFA-PTD Performance}
+\section{Conclusion}
+
+\newpage
+
+\bibliographystyle{splncs}
+\bibliography{patch}
+\end{document}
