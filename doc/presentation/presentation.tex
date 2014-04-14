@@ -100,8 +100,37 @@
 % Cross Matrix:  print the argument in the cross matrix notation
 \newcommand{\crmat}[1]{\ensuremath{\left[{#1}\right]_{\times}}}
 
+%random variable
+\newcommand{\rand}[1]{\ensuremath{\mathbb{#1}}}
+
+%insert 2 figures on a row
+\newcommand{\insertTwoF}[4]{
+  \begin{figure}[h!]
+    \centering
+    \begin{minipage}{#4\linewidth}
+    \includegraphics[width=\linewidth]{#1}
+    \end{minipage}
+    \begin{minipage}{#4\linewidth}
+    \includegraphics[width=\linewidth]{#2}
+    \end{minipage}
+      \caption{#3}
+  \end{figure}  
+}
+
+\newcommand{\insertF}[3]{
+  \begin{figure}[h!]
+    \centering
+    \begin{minipage}{#3\linewidth}
+    \includegraphics[width=\linewidth]{#1}
+    \end{minipage}  
+      \caption{#2}
+  \end{figure}  
+}
+
 %enable numbering captions for the images
 \setbeamertemplate{caption}[numbered]
+
+
 
 %begining of the doc
 \begin{document}
@@ -132,13 +161,8 @@
  \section{Introduction}
  \begin{frame}
   \frametitle{Introduction}
-	\begin{figure}[h!]
-	\centering
-	\begin{minipage}{0.7\linewidth}
-	\includegraphics[width=\linewidth]{lena}
-	\end{minipage}
-	    \caption{Example of application of such techniques}
-	\end{figure}
+  \insertF{ste}{depth map in stereo vision}{0.5}
+  \insertF{debruitage}{Non local means denoising}{0.6}
  \end{frame}
 
  %ToC page
@@ -170,52 +194,150 @@
  
  \section{A contrario Method}
  \begin{frame}
-  \frametitle{Modeling}
-  A patch is considered as a random variable $\mathbb{B}=c_i \mat{B}_i$ a linear combination of reference patches, where $c_i$ are independent random variable following a distribution $h_i$.
-	\begin{figure}[h!]
-	\centering
-	\begin{minipage}{0.4\linewidth}
-	\includegraphics[width=\linewidth]{zebra.jpg}
-	  
-	\end{minipage}
-	\begin{minipage}{0.4\linewidth}
-	\includegraphics[width=\linewidth]{princomp_zebra.png}
-    
-	\end{minipage}
-	    \caption{Left: A natural image; right: reference patches}
-	
-	\end{figure}      
- \end{frame}
- \begin{frame}
-  \frametitle{Modeling}
-  A patch is considered as a random variable $\mathbb{B}=c_i \mat{B}_i$ a linear combination of reference patches, where $c_i$ are independent random variable following a distribution $h_i$.
-	\begin{figure}[h!]
-	\centering
-	\begin{minipage}{0.4\linewidth}
-	\includegraphics[width=\linewidth]{lena}
-	  
-	\end{minipage}
-	\begin{minipage}{0.4\linewidth}
-	\includegraphics[width=\linewidth]{princomp_lena.png}
-    
-	\end{minipage}
-	    \caption{Left: A natural image; right: reference patches}
-	
-	\end{figure}      
- \end{frame}
-  \begin{frame}
-  \frametitle{Modeling}
-	\begin{figure}[h!]
-	\centering
-	\begin{minipage}{0.8\linewidth}
-	\includegraphics[width=\linewidth]{hist}
-	  
-	\end{minipage}
+  \frametitle{Modeling : principle components analysis}
+  \begin{itemize}
+     \item A patch is modeled as a random variable $\rand{B}=\rand{C}_i \mat{B}_i$, a linear combination of reference patches, where $\rand{C}_i$ are independent random variable following a distribution $H_i$.
+     \item The reference patches are extracted using a PCA algorithm, ($\rand{C}_i$) are supposed to be independent. (uncorrelated indeed)
+  \end{itemize}
 
-	    \caption{Distribution of the firsts components}
+	\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.4\linewidth}
+	\includegraphics<1>[width=\linewidth]{zebra.jpg}
+	\includegraphics<2>[width=\linewidth]{lena.jpg}
+	\includegraphics<3>[width=\linewidth]{wn.png}
+	\end{minipage}
+	\begin{minipage}{0.4\linewidth}
+	\includegraphics<1>[width=\linewidth]{princomp_zebra.png}
+	\includegraphics<2>[width=\linewidth]{princomp_lena.png}
+	\includegraphics<3>[width=\linewidth]{princomp_wn.png}
+	\end{minipage}
+	    \caption{Left: a natural image; right: reference patches}
 	
 	\end{figure}      
  \end{frame}
+ 
+ \begin{frame}
+  \frametitle{Modeling : compare with the cosine basis}
+We observe that the principle components of a nature image coincide with the cosine basis.
+  \begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.4\linewidth}
+    \includegraphics[width=\linewidth]{cosinus_basis.png}
+    \end{minipage}
+    \begin{minipage}{0.4\linewidth}
+    \includegraphics[width=\linewidth]{princomp_lena.png}
+    \end{minipage}
+      \caption{Left: the cosine basis; right: the principle components of zebra.jpg}
+  \end{figure}      
+ \end{frame}
+ 
+ \begin{frame}
+  \frametitle{Statistic : distribution of $\rand{C}_i$}
+  \begin{itemize}
+   \item The distribution of $\rand{C}_i$ is the empirical histogram of $\rand{C}_i$ over all the image
+   \item We can also fit these distributions by a parametric distribution. (Gaussian, Laplacian ...)
+  \end{itemize}
+
+    \begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.4\linewidth}
+    \includegraphics<1-2>[width=\linewidth]{patch_1.png}
+    \includegraphics<3-4>[width=\linewidth]{patch_2.png}
+    \includegraphics<5-6>[width=\linewidth]{patch_3.png}
+    \includegraphics<7-8>[width=\linewidth]{patch_4.png}
+    \end{minipage}
+    \begin{minipage}{0.4\linewidth}
+    \includegraphics<1>[width=\linewidth]{h_1.png}
+    \includegraphics<2>[width=\linewidth]{h_1_gau.png}
+    \includegraphics<3>[width=\linewidth]{h_2.png}
+    \includegraphics<4>[width=\linewidth]{h_2_gau.png}
+    \includegraphics<5>[width=\linewidth]{h_3.png}
+    \includegraphics<6>[width=\linewidth]{h_3_gau.png}
+    \includegraphics<7>[width=\linewidth]{h_4.png}
+    \includegraphics<8>[width=\linewidth]{h_4_gau.png}
+    \end{minipage}
+      \caption{Left: the cosine basis; right: the principle components of zebra.jpg}
+  \end{figure}  
+ \end{frame}
+
+ 
+\begin{frame}
+\frametitle{Statistic : distribution of $\rand{C}_i$}
+      \begin{figure}[h!]
+      \centering
+      \begin{minipage}{0.8\linewidth}
+      \includegraphics[width=\linewidth]{hist}
+	
+      \end{minipage}
+
+	  \caption{Left: distribution of the first component; right: histogram of the image}
+      
+      \end{figure}      
+\end{frame}
+ 
+\begin{frame}
+\frametitle{Statistic :}
+      \begin{figure}[h!]
+      \centering
+      \begin{minipage}{0.8\linewidth}
+      \includegraphics[width=\linewidth]{h_1vs_hist}
+      \end{minipage}
+	  \caption{Distribution of the firsts components}
+      \end{figure}     
+\end{frame}
+
+ \section{Likelihood ration}
+ 
+\begin{frame}
+ \scriptsize
+ {
+ \begin{enumerate}
+
+
+  \item A contrario method
+  \item \textbf{Likelihood ratio}
+  \item Likelihood ratio with learned prior
+  \item Comparison
+  
+ \end{enumerate}
+
+  %\frametitle{Table of contents}
+  %\tableofcontents
+  
+ }
+ \end{frame} 
+ 
+ \begin{frame}
+\frametitle{Likelihood method}
+ \scriptsize
+ {
+ \begin{enumerate}
+ \item Exhibit a statistical test to know if two patches are similar
+ \item We assume each patch $\mathbf{x}$ is issued from a noise-free patch $\theta$ with some noise. E.g., if the noise is normal, $\mathbf(x) = \theta + \mathbf{n}$ where $n \sim \mathcal{N}(0,\sigma)$
+ \item We consider and compare the null hypothesis $\mathcal{H}_0 : \theta_1=\theta2$ and the alternative hypothesis $\mathcal{H}_1 : \theta_1\neq\theta_2$
+ \end{enumerate}
+ }
+\end{frame}
+\begin{frame}
+\frametitle{Likelihood ratio}
+The Bayesian likelihood ratio considers a known prior
+\begin{align*}
+L_B(\mathbf{x_1},\mathbf{x_2})&=\frac{p(\mathbf{x_1},\mathbf{x_2};\mathcal{H}_0)}{p(\mathbf{x_1},\mathbf{x_2};\mathcal{H}_1)}\\
+&=\frac{\int p(\mathbf{x_1}|\mathbf{\theta_{12}}=t)p(\mathbf{x_2}|\mathbf{\theta_{12}}=t)p(\mathbf{\theta_{12}}=\mathbf{t})\mathrm{d}\mathbf{t}}{\prod_{i=1,2}\int p(\mathbf{x_i}|\mathbf{\theta_i})\mathbf{t_i})p(\mathbf{\theta_i}=\mathbf{t_i})\mathrm{d}\mathbf{t_i}}
+\end{align*}
+The prior can be non-informative, such as a Jeffreys prior.
+\end{frame}
+
+\begin{frame}
+\frametitle{Likelihood ratio}
+The generalized likelihood ratio uses the maximum likelihood estimates for the noise-free patches.
+\[
+L_G(\mathbf{x_1},\mathbf{x_2})=\frac{\sup_\mathbf{t}p(\mathbf{x_1},\mathbf{x_2};\theta_{12}=\mathbf{t},\mathcal{H}_0)}
+{\sup_{t_1,t_2}p(x_1,x_2 \arrowvert \theta_1=t_1,\; \theta_2=t_2 , \mathcal{H}_1)}
+\]
+This comes down to using euclidian distance when the prior is non-informative.
+\end{frame}
  
  \section{Likelihood ration with learned prior}
  \begin{frame}
@@ -230,7 +352,6 @@
   \begin{enumerate}
    \item motivation
    \item approach
-   \item result
   \end{enumerate}
 
   \item Comparison
@@ -244,21 +365,152 @@
  \end{frame} 
  
  \begin{frame}
-  \frametitle{Approach}
-  likelihood ratio :
-  \[
-  \begin{split}
-   P(x_1,x_2 \arrowvert \mathcal{H}_0)&=\int P(x_1 \arrowvert \theta_{12}) P(x_2 \arrowvert \theta_{12}) p(\theta_{12}) d\theta_{12}
-  \end{split}
-  \]
+  \frametitle{Motivation}
+   \begin{itemize}
+    \item{\textbf{Motivation}} Previous approach : image patches are considered as a white noise (c.f. section Comparison).
+    \item{\textbf{Objective}} Introduce the prior information proposed by the a-constrario method, into the likelihood ratio.
+   \end{itemize}
+   \insertTwoF{lena.jpg}{wn}{}{0.4}
+ \end{frame}
+ 
+ \begin{frame}
+  \frametitle{Approach : likelihood ratio}
+  \begin{itemize}
+   \item likelihood ratio :
+   \begin{equation}
+    \mathcal{L}=\frac{P(x_1,x_2 \arrowvert \mathcal{H}_0)}{P(x_1,x_2 \arrowvert \mathcal{H}_1)}
+   \end{equation}
+   \item we use the prior information $p(\theta_{12}) d\theta_{12}=\prod_i h_i(c_i)dc_i$ to compute this ratio
+   \begin{equation}
+   \begin{split}
+       P(x_1,x_2 \arrowvert \mathcal{H}_0)&=\int P(x_1 \arrowvert \theta_{12}) P(x_2 \arrowvert \theta_{12}) p(\theta_{12}) d\theta_{12}\\
+       &=\int P(x_1 \arrowvert \theta_{12}) P(x_2 \arrowvert \theta_{12}) \prod_i h_i(c_i)dc_i\\
+   \end{split}
+   \end{equation}
+   \item for gaussian noise : $P(x \arrowvert \theta_{12})\propto \exp (- 1/\sigma^2  \lVert x-\theta_{12} \rVert^2) $
+   \item orthogonal component $ +$ univariate gaussian noise $\longrightarrow$ separable integral! 
+  \end{itemize}
+ \end{frame}
+ 
+ \begin{frame}
+  \frametitle{Approach : maximum likelihood ratio}
+
+   \begin{equation}
+   \begin{split}
+       P(x_1 \arrowvert \mathcal{H}_1)&=\int P(x_1 \arrowvert \theta_{1})  p(\theta_{1}) d\theta_{1}\\
+       &=\int \exp (- 1/\sigma^2  \lVert x_1-\theta_{1} \rVert^2)  \prod_i h_i(c_i)dc_i\\
+       &=\int \exp (- 1/\sigma^2  \lVert \sum _i (cx_i -c_{i})\mat B_i \rVert^2)  \prod_i h_i(c_i)dc_i\\
+       &=\prod_i \int \exp (- 1/\sigma^2  \lVert (cx_i -c_{i}) \rVert^2)   h_i(c_i)dc_i\\
+   \end{split}
+   \end{equation}
+   \insertF{corr}{Distribution of $\rand{C}_i$}{0.3}
+ \end{frame}
+ 
+  \begin{frame}
+   \frametitle{Approach : generalized likelihood ratio}
+   \begin{itemize}
+    \item Maximum a posteriori (Gaussian approximation for the prior) 
+   \begin{equation}
+   \begin{split}
+       \mathcal{Q}&=\sup_{\theta_{12}} P(x_1 \arrowvert \theta_{12}) P(x_2 \arrowvert \theta_{12}) p(\theta_{12})\\
+       &=\prod_i  \sup_{c_i}  \exp (- 1/\sigma^2  \lVert (cx_i -c_{i}) \rVert^2- 1/\sigma^2  \lVert (cx_i -c_{i}) \rVert^2 \\
+       &- 1/\sigma_i^2  \lVert (c_{i}-\mu_i) ) 
+   \end{split}
+   \end{equation}
+   \item $\hat c_i=(a (x_1+x_2)+\mu_i)/(1+2a)$ where $a=(\sigma_i /\sigma)^2$
+   \insertF{corr}{Distribution of $\rand{C}_i$}{0.3}
+   \end{itemize}
+
+ \end{frame}
+ 
+  \begin{frame}
+  \frametitle{Approach : generalized likelihood ratio}
+   \insertTwoF{curve}{corr}{ In blue, The similarity as a function of $\sigma_i$, the standard deviation of $\rand{C}_i$; in red, the euclidian distance }{0.45}
+ \end{frame}
+ 
+ 
+ \section{Comparison}
+  \begin{frame}
+ \scriptsize
+ {
+ \begin{enumerate}
+
+
+  \item A contrario method
+  \item Likelihood ratio
+  \item {Likelihood ratio with learned prior}
+  \item \textbf{Comparison}
   
-  \[
-  \begin{split}
-   p(\theta_{12}) d\theta_{12}=\prod_i h_i(c_i)dc_i
-  \end{split}
-  \]
+ \end{enumerate}
+
+  %\frametitle{Table of contents}
+  %\tableofcontents
+  
+ }
  \end{frame}
 
+\begin{frame}
+\frametitle{Results for different methods}
+\begin{figure}
+\centering
+\begin{minipage}{0.3\linewidth}
+\includegraphics[width=1.3\linewidth]{zebra_heatmap_euclidian.png}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\includegraphics[width=1.3\linewidth]{zebra_heatmap_similarity.png}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\includegraphics[width=1.3\linewidth]{zebra_heatmap_approx.png}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Results for different methods}
+\begin{figure}
+\centering
+\begin{minipage}{0.3\linewidth}
+\includegraphics[width=1.3\linewidth]{zebra_best_matches_euclidian.png}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\includegraphics[width=1.3\linewidth]{zebra_best_matches_similarity.png}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\includegraphics[width=1.3\linewidth]{zebra_best_matches_approx.png}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+  
+  \begin{frame}
+  \frametitle{Performance PFA versus PTD}
+   \insertTwoF{zebra.jpg}{perf_zebra_max}{ method max }{0.45}
+ \end{frame}
+ 
+   \begin{frame}
+  \frametitle{Performance PFA versus PTD}
+   \insertTwoF{lena.jpg}{perf_texture_max}{ method max  }{0.45}
+ \end{frame}
+ 
+  
+   \begin{frame}
+  \frametitle{Performance PFA versus PTD}
+   \insertTwoF{wn}{perf_wn_max}{ method max  }{0.45}
+ \end{frame}
+ 
+  \begin{frame}
+  \frametitle{Performance PFA versus PTD}
+   \insertTwoF{zebra.jpg}{perf_zebra_int}{ method int }{0.45}
+  \end{frame}
+ 
+  \begin{frame}
+  \frametitle{Performance PFA versus PTD}
+   \insertF{perf_zebra_max}{ method max }{0.8}
+ \end{frame}
+   \begin{frame}
+  \frametitle{Performance PFA versus PTD}
+   \insertF{perf_zebra_int}{ method int}{0.8}
+ \end{frame}
  
 % \begin{frame}
 %  \frametitle{Conclusion}

@@ -1,8 +1,8 @@
 close all
 clear all
 %% read image
-I=imread('../../data/baboon_small.jpg');
-%I=imread('../../data/test.jpg');
+%I=imread('../../data/texture.jpg');
+I=imread('../../data/zebra.jpg');
 I=double(rgb2gray(I))/255.;
 %I=0.5+randn(size(I));
 figure,imshow(I)
@@ -40,8 +40,8 @@ count=1;
 sigma_list=[0.05,0.07,0.1,0.15,0.2,0.3];
 for ps=sigma_list
     para.sigma = ps;
-    %compare_sim=@(p,q)(similarity(p(:),q(:),patches_principle',priorModel,para));
-    compare_sim=@(p,q)(similarity_gau_approx(p(:),q(:),patches_principle',priorModel_gau,para));
+    compare_sim=@(p,q)(similarity(p(:),q(:),patches_principle',priorModel,para));
+    %compare_sim=@(p,q)(similarity_gau_approx(p(:),q(:),patches_principle',priorModel_gau,para));
     hold on,
     M(:,:,count)=dico_curves( dico1,dico2,compare_sim,[0 0 1] );
     count=count+1
@@ -61,7 +61,7 @@ for i=1:length(sigma_list)
 end
 [FA_eu,TD_eu]=getPFA(M_eu);
 %% plot
-figure,hold on,
+hf=figure,hold on,
 plot(FA_eu,TD_eu,'-r','Linewidth',2);
 plot(FA_sim(:,1),TD_sim(:,1),'-b','Linewidth',2);
 plot(FA_sim(:,2),TD_sim(:,2),'-','Linewidth',2,'Color',[0 1 1]);
@@ -70,3 +70,4 @@ plot(FA_sim(:,4),TD_sim(:,4),'-','Linewidth',2,'Color',[0 0 0]);
 plot(FA_sim(:,5),TD_sim(:,5),'-','Linewidth',2,'Color',[0.1 0.1 0.1]);
 plot(FA_sim(:,6),TD_sim(:,6),'-','Linewidth',2,'Color',[0.25 0.25 0]);
 legend('euclidian','sigma = 0.05','sigma = 0.07','sigma = 0.1','sigma = 0.15','sigma = 0.2','sigma = 0.3');
+saveas(hf,'perf','png');
