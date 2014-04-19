@@ -151,6 +151,31 @@ zerrrrrrrrrrrrrrrrrrrrrf
 
 
 \section{Likelihood Ratio for Patch Comparison}
+In this framework, we model each observed patch of size $p$ by the realization $\mathbf{x} \in \mathcal{R}^p$ of a noise-free patch $\boldsymbol{\theta} \in \mathcal{R}^p$ deformed with noise. For example, if we consider normal additive noise, then we can write
+\[
+\mathbf{x} = \boldsymbol{\theta} + \mathbf{n}
+\]
+where $\mathbf{n} \in \mathcal{R}^p$ is a zero-mean normal distribution with variance $\sigma^2$ on each of its $p$ independent components. \\
+We want to know if two observed patches $\mathbf{x}_1$ and $\mathbf{x}_2$ are two realizations of the same patch $\boldsymbol{\theta}_{12}$ deformed with noise (null hypothesis $\mathcal{H}_0$) or realizations of two different patches $\boldsymbol{\theta}_1 \neq \boldsymbol{\theta}_2$ (alternative hypothesis $\mathcal{H}_1$). \\
+We give ourselves a criterion $\mathcal{C} : \mathcal{R}^p \times \mathcal{R}^p \rightarrow \mathcal{R}$ and a threshold $\tau$. We estimate that alternative hypothesis is verified if $\mathcal{C}(\mathbf{x}_1,\mathbf{x}_2)<\tau$. \\
+Several statistic criteria can be used to compare patches. The Bayesian likelihood ratio is defined as the ratio of observing the patches under the two hypotheses:
+\[
+\mathcal{L}(\mathbf{x}_1,\mathbf{x}_2)=\frac{p(\mathbf{x}_1,\mathbf{x}_2|\mathcal{H}_0)}{p(\mathbf{x}_1,\mathbf{x}_2|\mathcal{H}_1)}
+\]
+To compute this, we have to condition upon the noise-free patches from which the observed patches may derive:
+\[
+\mathcal{L}(\mathbf{x}_1,\mathbf{x}_2)=
+\frac{\int_{\mathbf{t \in \mathcal{R}^p}} p(\mathbf{x}_1|\boldsymbol{\theta}_{12}=\mathbf{t}) p(\mathbf{x}_2|\boldsymbol{\theta}_{12}=\mathbf{t})p(\boldsymbol{\theta}_{12}=\mathbf{t})\mathrm{d}\mathbf{t}}{\prod_{i=1,2}\int_{\mathbf{t \in \mathcal{R}^p}} p(\mathbf{x}_i|\boldsymbol{\theta}_{i}=\mathbf{t}) p(\boldsymbol{\theta}_{i}=\mathbf{t})\mathrm{d}\mathbf{t}}
+\]
+We have to make two assumptions to compute this ratio. First, the model of noise should be known, which allows us to compute $p(\mathbf{x}|\boldsymbol\theta)$. In the case of an additive, zero-mean normal noise of variance $\sigma^2$, we have
+\[
+p(\mathbf{x}|\boldsymbol\theta)\propto\exp\left(\frac{|\mathbf{x}-\boldsymbol\theta|^2}{2\sigma^2}\right)
+\]
+We also have to model $p(\boldsymbol\theta)$. In the case of the article from Deledalle et al., we use a non-informative prior (Jeffreys' prior), which minimizes a quantity that makes sense in information theory. However, in terms of images, we see that it comes down modeling the noise-free patches by realizations of noise. Under normal noise, computing the ratio under this hypothesis is equivalent to compute the euclidian distance between the two observations.\\
+While the Bayesian likelihood ratio offers good theoretical properties, the computation of the integral may be long or impossible under certain circumstances. For this reason, we also introduce the generalized likelihood ratio which uses the maximum likelihood estimate for the noise-free patches:
+\[
+\mathcal{L}_G(\mathbf{x}_1,\mathbf{x}_2)=\frac{\sup_{\mathbf{t}}p(\mathbf{x}_1,\mathbf{x}_2|\boldsymbol\theta_{12}=\mathbf{t}, \mathcal{H}_0)}{\sup_{\mathbf{t}_1,\mathbf{t}_2}p(\mathbf{x}_1,\mathbf{x}_2|\boldsymbol\theta_i=\mathbf{t}_i, \mathcal{H}_1)}
+\]
 \subsection{Statistic Criterion for Patch Comparison}
 \subsection{Likelihood Ratio and General Approach}
 
