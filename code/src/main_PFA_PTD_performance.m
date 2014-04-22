@@ -1,5 +1,6 @@
 close all
 clear all
+rng('default')
 %% read image
 %I=imread('../../data/texture.jpg');
 I=imread('../../data/zebra.jpg');
@@ -37,19 +38,22 @@ dico2(dico2>1)=1;
 M=[];% M is the correlation matrix
 figure,
 count=1;
-sigma_list=[0.05,0.07,0.1,0.15,0.2,0.3];
+%sigma_list=[0.05,0.07,0.1,0.15,0.2,0.3];
+sigma_list=[0.15];
 for ps=sigma_list
     para.sigma = ps;
-    compare_sim=@(p,q)(similarity(p(:),q(:),patches_principle',priorModel,para));
-    %compare_sim=@(p,q)(similarity_gau_approx(p(:),q(:),patches_principle',priorModel_gau,para));
+    %compare_sim=@(p,q)(similarity(p(:),q(:),patches_principle',priorModel,para));
+    compare_sim=@(p,q)(similarity_gau_approx(p(:),q(:),patches_principle',priorModel_gau,para));
     hold on,
     M(:,:,count)=dico_curves( dico1,dico2,compare_sim,[0 0 1] );
     count=count+1
 end
 %%
 hold on,
-compare_euclid=@(p,q)(-sqrt(sum(sum((p-q).^2))));
-M_eu=dico_curves( dico1,dico2,compare_euclid,[1 0 0] );
+%compare_euclid=@(p,q)(-sqrt(sum(sum((p-q).^2))));
+d=14;
+compare_reduc=@(p,q)(-distance_reduc(p(:),q(:),d,patches_principle'));
+M_eu=dico_curves( dico1,dico2,compare_reduc,[1 0 0] );
 
 %%
 FA_sim=[];
@@ -64,10 +68,10 @@ end
 hf=figure,hold on,
 plot(FA_eu,TD_eu,'-r','Linewidth',2);
 plot(FA_sim(:,1),TD_sim(:,1),'-b','Linewidth',2);
-plot(FA_sim(:,2),TD_sim(:,2),'-','Linewidth',2,'Color',[0 1 1]);
-plot(FA_sim(:,3),TD_sim(:,3),'-','Linewidth',2,'Color',[1 1 0]);
-plot(FA_sim(:,4),TD_sim(:,4),'-','Linewidth',2,'Color',[0 0 0]);
-plot(FA_sim(:,5),TD_sim(:,5),'-','Linewidth',2,'Color',[0.1 0.1 0.1]);
-plot(FA_sim(:,6),TD_sim(:,6),'-','Linewidth',2,'Color',[0.25 0.25 0]);
-legend('euclidian','sigma = 0.05','sigma = 0.07','sigma = 0.1','sigma = 0.15','sigma = 0.2','sigma = 0.3');
+% plot(FA_sim(:,2),TD_sim(:,2),'-','Linewidth',2,'Color',[0 1 1]);
+% plot(FA_sim(:,3),TD_sim(:,3),'-','Linewidth',2,'Color',[1 1 0]);
+% plot(FA_sim(:,4),TD_sim(:,4),'-','Linewidth',2,'Color',[0 0 0]);
+% plot(FA_sim(:,5),TD_sim(:,5),'-','Linewidth',2,'Color',[0.1 0.1 0.1]);
+% plot(FA_sim(:,6),TD_sim(:,6),'-','Linewidth',2,'Color',[0.25 0.25 0]);
+% legend('euclidian','sigma = 0.05','sigma = 0.07','sigma = 0.1','sigma = 0.15','sigma = 0.2','sigma = 0.3');
 saveas(hf,'perf','png');

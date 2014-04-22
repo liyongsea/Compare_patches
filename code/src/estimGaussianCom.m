@@ -6,6 +6,6 @@ var=[];
     for i=1:size(coeff_proj,2)
         m=estimateGaussian(coeff_proj(:,i));
         mu=[mu,m.mu];
-        var=[var,m.sigma]
+        var=[var,m.sigma];
     end
 end

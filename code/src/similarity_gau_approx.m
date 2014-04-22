@@ -2,8 +2,9 @@ function res=similarity_gau_approx(x1,x2,P,priorModel_gau_appro,para)
 % compute the likelyhood ratio using the prior Model
 %------------------
 %projet x1 x2 (column vectors) on the principal componant basis
-cx1=P*x1;
-cx2=P*x2;
+
+cx1=P*x1(:);
+cx2=P*x2(:);
 var_theta=priorModel_gau_appro.var';
 mu_theta=priorModel_gau_appro.mu';
 a=var_theta./((para.sigma)^2);
