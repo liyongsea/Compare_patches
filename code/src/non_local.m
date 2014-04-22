@@ -6,7 +6,7 @@ n = 128;
 c = [100 200];
 f0 = load_image('lena');
 f0 = rescale( crop(f0,n, c) );
-clf;
+figure(111);
 imageplot(f0);
 
 %% add noise
@@ -45,17 +45,17 @@ for i=1:16
 end
 
 %% dimension reduction
-d = 10;
+d = 20;
 resh = @(P)reshape(P, [n*n w1*w1])';
 remove_mean = @(Q)Q - repmat(mean(Q), [w1*w1 1]);
 P1 = remove_mean(resh(P));
 C = P1*P1';
 [V,D] = eig(C); D = diag(D);
 [D,I] = sort(D, 'descend'); V = V(:,I);
-clf;
+figure(55),
 plot(D); axis('tight');
 %%
-clf;
+figure(55),
 for i=1:16
     imageplot( reshape(V(:,i),[w1 w1]), '', 4,4,i );
 end
@@ -67,11 +67,11 @@ H = descriptor(f);
 distance = @(i)sum( (H - repmat(H(i(1),i(2),:), [n n 1])).^2, 3 )/(w1*w1);
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
-tau = .04;
+tau = .08;
 i = [83 72];
 D = distance(i);
 K = kernel(i,tau);
-clf;
+figure(55),
 imageplot(D, 'D', 1,2,1);
 imageplot(K, 'K', 1,2,2);
 %% NL filter
@@ -91,11 +91,12 @@ NLval = @(K,sel)sum(sum(K.*f(sel{1},sel{2})));
 NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 [Y,X] = meshgrid(1:n,1:n);
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
-tau = .08;
+tau = .06;
 figure(13)
-imageplot(NLmeans(tau));
-%% SNR
-g=NLmeans(tau);
+h=NLmeans(tau);
+imageplot(h);
+
+
 
 %% my similarity for NL denoising
 % learn by PCA
