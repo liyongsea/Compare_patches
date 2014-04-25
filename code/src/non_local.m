@@ -1,22 +1,31 @@
 close all
 clear all
+
 %% patches in images
 
+experience='../../results/byzh';%set path to save images
+experience_noise='noise_05';
 n = 128;
-c = [100 200];
-f0 = load_image('lena');
+c = [120 200];
+f0=double(rgb2gray(imread('../../data/byzh.jpg')))./255;
+f0=imresize(f0,0.5);
+%f0 = load_image('lena');
 f0 = rescale( crop(f0,n, c) );
-figure(111);
+hf=figure(101);
 imageplot(f0);
+set(gca,'position',[0 0 1 1],'units','normalized')
+saveas(hf,sprintf('%s/origine',experience),'png');
 
 %% add noise
-sigma = .1;
+sigma = .05;
 f = f0 + randn(n,n)*sigma;
-figure(1);
+hf=figure(202);
 imageplot(clamp(f));
+set(gca,'position',[0 0 1 1],'units','normalized')
+saveas(hf,sprintf('%s/%s/noisy',experience,experience_noise),'png');
 
 %% 
-
+figure(),
 w = 3; %half width
 w1 = 2*w+1 ;
 
@@ -45,7 +54,7 @@ for i=1:16
 end
 
 %% dimension reduction
-d = 20;
+d = 5;
 resh = @(P)reshape(P, [n*n w1*w1])';
 remove_mean = @(Q)Q - repmat(mean(Q), [w1*w1 1]);
 P1 = remove_mean(resh(P));
@@ -68,7 +77,8 @@ distance = @(i)sum( (H - repmat(H(i(1),i(2),:), [n n 1])).^2, 3 )/(w1*w1);
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
 tau = .08;
-i = [83 72];
+%i = [83 72];
+i=[73 76];
 D = distance(i);
 K = kernel(i,tau);
 figure(55),
@@ -91,13 +101,34 @@ NLval = @(K,sel)sum(sum(K.*f(sel{1},sel{2})));
 NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 [Y,X] = meshgrid(1:n,1:n);
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
-tau = .06;
-figure(13)
-h=NLmeans(tau);
-imageplot(h);
+h=[];
+it=1;
+tau_list=0.004:0.002:0.015;
+mySNR=[];
+for tau=tau_list
+%tau = .06;
+h(:,:,it)=NLmeans(tau);
+mySNR(it)=snr(f0,h(:,:,it));
+it=it+1;
+end
+figure(),plot(tau_list,mySNR,'LineWidth',3);
+title('SNR_tau');
 
-
-
+%%
+[snr_min,ind_opt]=max(mySNR);
+tau_list=0.004:0.002:0.015;
+for ind=1:length(tau_list)
+tau_opt=tau_list(ind);
+h_opt=h(:,:,ind);
+hf=figure(155),imshow(h_opt)
+title(sprintf('SNR %f',snr(f0,h_opt)))
+set(gca,'position',[0 0 1 1],'units','normalized')
+saveas(hf,sprintf('%s/%s/eucli_reduc5_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,h_opt)),'png');
+end
+%%
+ind=6;
+figure(),imageplot(h(:,:,ind))
+title(sprintf('SNR %f',snr(f0,h(:,:,ind))))
 %% my similarity for NL denoising
 % learn by PCA
 [patches_principle,coeff_proj]=princomp(resh(patch(f))');
@@ -106,30 +137,38 @@ resolution=255;
 [mu var]=estimGaussianCom(coeff_proj);
 priorModel_gau.mu=mu;
 priorModel_gau.var=var;
-para.sigma=0.05;
-compare_sim=@(p,q)(similarity_gau_approx_ele(p,q,patches_principle',priorModel_gau,para));
-%%
+para.sigma=0.03;
+
+%% assign value
+priorModel_gau.vt=reshape(priorModel_gau.var,[],1);
+priorModel_gau.mt=reshape(priorModel_gau.mu,[],1);
+priorModel_gau.a=reshape(var./((para.sigma)^2),[],1);
+compare_sim=@(p,q)(similarity_gau_approx_acc(p,q,priorModel_gau,para));
+
 jresh=@(p)reshape(p,[n,n,w1*w1]);
-J=jresh(P);
-distance = @(i)-reshape( sum(bsxfun(compare_sim, resh(P), reshape(J(i(1),i(2),:),[w1*w1,1])  )),n,n);
+J=jresh(coeff_proj);
+J=permute(J,[3 1 2]);%J is permutated to fit the bsxfun (change it if you get a better idea)
+
+%% mesure the similarity of one patch on all image
+
+perm=@(k)permute(k,[2 3 1]);
+distance = @(i)-perm(sum(bsxfun(compare_sim, J ,J(:,i(1),i(2)))));
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
-tau = 7;
-i = [83 72];
+tau = 4;
+%i = [83 72];
+i = [95 70];
 D = distance(i);
 K = kernel(i,tau);
 figure(4),
 imageplot(D, 'D', 1,2,1);
 imageplot(K, 'K', 1,2,2);
-%%
+
+%% similarity kernel on a sub window
 
 q = 14;
 selection = @(i){clamp(i(1)-q:i(1)+q, 1,n), clamp(i(2)-q:i(2)+q,1,n)};
-distance = @(i,sel)-reshape( sum(...
-    bsxfun(compare_sim, ...
-    reshape(P(sel{1},sel{2},:,:),[length(sel{1})*length(sel{2}),w1*w1])',...
-    reshape(J(i(1),i(2),:),[w1*w1,1])) )...
-    ,[length(sel{1}) length(sel{2})]);
+distance = @(i,sel)-perm(sum(bsxfun(compare_sim, J(:,sel{1},sel{2}),J(:,i(1),i(2)))));
 distance = @(i)distance(i,selection(i));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
 D = distance(i);
@@ -137,19 +176,95 @@ K = kernel(i,tau);
 figure(4)
 imageplot(D, 'D', 1,2,1);
 imageplot(K, 'K', 1,2,2);
-%%
+
+%% non local means denoising using our similarity criterion
 NLval = @(K,sel)sum(sum(K.*f(sel{1},sel{2})));
 NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 [Y,X] = meshgrid(1:n,1:n);
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
-g=zeros(n,n)
-tau = 7;
-for i=1:n
-    i
-    for j=1:n
-        g(i,j)=NLval([i,j],tau);
-        
+g=zeros(n,n);
+g_list=[];
+tau_list=3:0.2:4.5;
+it=1;
+mySNR=[];
+for tau = tau_list
+    for i=1:n
+        if (mod(i,10)==1)
+            fprintf('tau = %f, %f persent finished\n\r',tau,i/128*100)
+        end
+        for j=1:n
+            g(i,j)=NLval([i,j],tau);
+
+        end
     end
+    mySNR(it)=snr(f0,g);
+    g_list(:,:,it)=g;
+    it=it+1;
 end
-figure(144)
-imageplot(g);
+figure(),plot(tau_list,mySNR,'LineWidth',3);
+title('SNR_tau');
+%% show the result with a best snr
+[snr_min,ind_opt]=max(mySNR);
+for ind=1:length(tau_list)
+tau_opt=tau_list(ind);
+g_opt=g_list(:,:,ind);
+hf=figure(144),imshow(g_opt)
+title(sprintf('SNR %f',snr(f0,g_opt)))
+set(gca,'position',[0 0 1 1],'units','normalized')
+saveas(hf,sprintf('%s/%s/our_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,g_opt)),'png');
+end
+%%
+% 
+% %%
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% jresh=@(p)reshape(p,[n,n,w1*w1]);
+% J=jresh(P);
+% distance = @(i)-reshape( sum(bsxfun(compare_sim, resh(P), reshape(J(i(1),i(2),:),[w1*w1,1])  )),n,n);
+% normalize = @(K)K/sum(K(:));
+% kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
+% tau = 7;
+% i = [83 72];
+% D = distance(i);
+% K = kernel(i,tau);
+% figure(4),
+% imageplot(D, 'D', 1,2,1);
+% imageplot(K, 'K', 1,2,2);
+% %%
+% 
+% q = 14;
+% selection = @(i){clamp(i(1)-q:i(1)+q, 1,n), clamp(i(2)-q:i(2)+q,1,n)};
+% distance = @(i,sel)-reshape( sum(...
+%     bsxfun(compare_sim, ...
+%     reshape(P(sel{1},sel{2},:,:),[length(sel{1})*length(sel{2}),w1*w1])',...
+%     reshape(J(i(1),i(2),:),[w1*w1,1])) )...
+%     ,[length(sel{1}) length(sel{2})]);
+% distance = @(i)distance(i,selection(i));
+% kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
+% D = distance(i);
+% K = kernel(i,tau);
+% figure(4)
+% imageplot(D, 'D', 1,2,1);
+% imageplot(K, 'K', 1,2,2);
+% %%
+% NLval = @(K,sel)sum(sum(K.*f(sel{1},sel{2})));
+% NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
+% [Y,X] = meshgrid(1:n,1:n);
+% NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
+% g=zeros(n,n)
+% tau = 7;
+% for i=1:n
+%     i
+%     for j=1:n
+%         g(i,j)=NLval([i,j],tau);
+%         
+%     end
+% end
+% figure(144)
+% imageplot(g);

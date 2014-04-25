@@ -112,6 +112,33 @@
 \newcommand{\draft}[1]{{\footnotesize{\textbf{\textcolor{blue}{Short version : compiling skipped}}}} \\}
 \newcommand{\toadd}[1]{{\textbf{\textcolor{orange}{[ADD: #1]}}}}
 
+%random variable
+\newcommand{\rand}[1]{\ensuremath{\mathbb{#1}}}
+
+%insert 2 figures on a row
+\newcommand{\insertTwoF}[4]{
+  \begin{figure}[h!]
+    \centering
+    \begin{minipage}{#4\linewidth}
+    \includegraphics[width=\linewidth]{#1}
+    \end{minipage}
+    \begin{minipage}{#4\linewidth}
+    \includegraphics[width=\linewidth]{#2}
+    \end{minipage}
+      \caption{#3}
+  \end{figure}  
+}
+
+\newcommand{\insertF}[3]{
+  \begin{figure}[h!]
+    \centering
+    \begin{minipage}{#3\linewidth}
+    \includegraphics[width=\linewidth]{#1}
+    \end{minipage}  
+      \caption{#2}
+  \end{figure}  
+}
+
 \begin{document}
 % \renewcommand\thelinenumber{\color[rgb]{0.2,0.5,0.8}\normalfont\sffamily\scriptsize\arabic{linenumber}\color[rgb]{0,0,0}}
 % \renewcommand\makeLineNumber {\hss\thelinenumber\ \hspace{6mm} \rlap{\hskip\textwidth\ \hspace{6.5mm}\thelinenumber}}
@@ -120,11 +147,6 @@
 \mainmatter
 \def\ECCV14SubNumber{979}  % Insert your submission number here
 
-% \title{Geometric Extrinsic Calibration of Mobile Devices using a Planar Mirror:\\ Screen, Front and Rear Cameras} % Replace with your title
-% \title{Screen, Front and Rear Cameras: How to Calibrate the Pose of your Smartphone?} % Replace with your title
-% \title{Geometric Extrinsic Calibration of a Smartphone} % Replace with your title
-% \title{How to Calibrate the Cameras of a Smartphone w.r.t its Screen?} % Replace with your title
-\title{Statistic Criterion for Patch Comparison} % Replace with your title
 
 \titlerunning{ECCV-14 submission ID \ECCV14SubNumber}
 
@@ -145,7 +167,7 @@
 <<<<<<< HEAD
 =======
 Comparing patches is an operation used in many domains of image processing. Many modern methods for image registration and stereo-vision reconstruction rely heavily on estimating how much two patches (small square blocks of pixels) are similar. Patches are also used for denoising. In this work, we try to find an efficient way to know if two different patches are similar. Dissimilarity between two patches may have two main causes; the first is intrinsic (two different objects) and the other one is due to noise. Thus, noise should be taken into account in our criteria to know if patches describe the same object or not. As noise and natural images have very different characteristics, it is possible to make use of these differences to build a criteria that automatically reduces the influence of noise.
-\\In section 2, we develop the likelihood ratio approach detailed by Deledalle et al in which we try to estimate a good statistic criterion for comparing two patches that takes into account independent noise in the patches. Then, we detail the a contrario method to learn a statistical distribution of the different patches. In section 4, we develop our method that uses this distribution as a prior for the likelihood ratio approach. We discuss our results and compare different methods in section 5.
+\\In section 2, we develop the likelihood ratio approach detailed by Deledalle et al. \cite{Deledalle:2012} in which we try to estimate a good statistic criterion for comparing two patches that takes into account independent noise in the patches. Then, we detail the \textit{a contrario} method, introduced by Sabater et al. \cite{Sabater:2012}, to learn a statistical distribution of the different patches. In section 4, we develop our method that uses this distribution as a prior for the likelihood ratio approach. We discuss our results and compare different methods in section 5.
 % CITE
 
 >>>>>>> ac8eb90926f65ad455462ed73db6b134632305f2
@@ -157,6 +179,7 @@ Comparing patches is an operation used in many domains of image processing. Many
 
 
 \section{Likelihood Ratio for Patch Comparison}
+
 In this framework, we model each observed patch of size $p$ by the realization $\mathbf{x} \in \mathcal{R}^p$ of a noise-free patch $\boldsymbol{\theta} \in \mathcal{R}^p$ deformed with noise. For example, if we consider normal additive noise, then we can write
 \[
 \mathbf{x} = \boldsymbol{\theta} + \mathbf{n}
@@ -177,7 +200,7 @@ We have to make two assumptions to compute this ratio. First, the model of noise
 \[
 p(\mathbf{x}|\boldsymbol\theta)\propto\exp\left(\frac{|\mathbf{x}-\boldsymbol\theta|^2}{2\sigma^2}\right)
 \]
-We also have to model $p(\boldsymbol\theta)$. In the case of the article from Deledalle et al., we use a non-informative prior (Jeffreys' prior), which minimizes a quantity that makes sense in information theory. However, in terms of images, we see that it comes down modeling the noise-free patches by realizations of noise. Under normal noise, computing the ratio under this hypothesis is equivalent to compute the euclidian distance between the two observations.\\
+We also have to model $p(\boldsymbol\theta)$. In the case of the article from Deledalle et al.\cite{Deledalle:2012}, we use a non-informative prior (Jeffreys' prior), which minimizes a quantity that makes sense in information theory. However, in terms of images, we see that it comes down modeling the noise-free patches by realizations of noise. Under normal noise, computing the ratio under this hypothesis is equivalent to compute the euclidian distance between the two observations.\\
 While the Bayesian likelihood ratio offers good theoretical properties, the computation of the integral may be long or impossible under certain circumstances. For this reason, we also introduce the generalized likelihood ratio which uses the maximum likelihood estimate for the noise-free patches:
 \[
 \mathcal{L}_G(\mathbf{x}_1,\mathbf{x}_2)=\frac{\sup_{\mathbf{t}}p(\mathbf{x}_1,\mathbf{x}_2|\boldsymbol\theta_{12}=\mathbf{t}, \mathcal{H}_0)}{\sup_{\mathbf{t}_1,\mathbf{t}_2}p(\mathbf{x}_1,\mathbf{x}_2|\boldsymbol\theta_i=\mathbf{t}_i, \mathcal{H}_1)}
@@ -185,10 +208,20 @@ While the Bayesian likelihood ratio offers good theoretical properties, the comp
 \subsection{Statistic Criterion for Patch Comparison}
 \subsection{Likelihood Ratio and General Approach}
 
-\section{A Contrario Model for Prior Learning}
-\subsection{A Contrario Method}
+\section{\textit{A Contrario} Model for Prior Learning}
+
+An \textit{a contrario} method for patch comparing consists in controlling the probability of false alarm in a stochastic background model in order to give a similarity criterion. Such a background model is called \textit{a contrario} model. The most natural and widely used criterion is the euclidian distance, whose background is the gaussian white noise model. However, patches from natural images are far more structured than a gaussian noise, thus such a naive model often produces false matches. In this section, we study the background model proposed by Sabater et al. \cite{Sabater:2012}.
+\subsection{\textit{A Contrario} Model}
+
+The model that we present here is inspired by the fact that high dimensional distribution of shapes can be seen as the tensor product of adequately chosen margin distribution. Here, we approximate these margin distribution by the patches basis deduced from a PCA (Principle Component Analysis). 
+
+A patch is modeled by a random variable $\rand{B}=\rand{C}_i \mat{B}_i$, a linear combination of reference patches, where $\rand{C}_i$ are independent random variable following a distribution $H_i$. Here, as we have explained above, the reference patches are the PCA basis, and $ H_i$ are their empirical histogram.
+
+One should notice that the independence of $\rand{C}_i$ is just an approximation, they are only deccorelated in reality. We will show that this modeling is good approximation and much more adapted to natural images.
+
 \subsection{Model and Statistic}
 
+In this section, we will study the \textit{a contrario} model. Typically, we will study the dynamic of the margin distributions and try to understand how it helps us to build a efficient patch similarity criterion.
 \section{Likelihood Ratio with A Contrario Prior}
 \subsection{Model}
 \subsection{Studying}

@@ -70,5 +70,3 @@ px2=patches_principle*x2;
 similarity(px1,px2,P,priorModel,para)
 similarity_gau_approx(px1,px2,P,priorModel_gau,para)
 %%
-
-for i=1:
