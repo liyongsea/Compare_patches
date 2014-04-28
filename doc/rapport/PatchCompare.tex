@@ -16,7 +16,7 @@
 \usepackage{epsfig}
 % \usepackage[noend]{algorithmic}
 % \newtheorem{thm}{Theorem}
-
+\graphicspath{{./Figure/}} 
 \definecolor{orange}{rgb}{1,0.5,0}
 \definecolor{darkgreen}{rgb}{0,0.5,0}
 \definecolor{darkblue}{rgb}{0,0,0.5}
@@ -116,7 +116,7 @@
 \newcommand{\rand}[1]{\ensuremath{\mathbb{#1}}}
 
 %insert 2 figures on a row
-\newcommand{\insertTwoF}[4]{
+\newcommand{\insertTwoF}[5]{
   \begin{figure}[h!]
     \centering
     \begin{minipage}{#4\linewidth}
@@ -126,19 +126,27 @@
     \includegraphics[width=\linewidth]{#2}
     \end{minipage}
       \caption{#3}
+      \label{#5}
   \end{figure}  
 }
 
-\newcommand{\insertF}[3]{
+\newcommand{\insertF}[4]{
   \begin{figure}[h!]
     \centering
     \begin{minipage}{#3\linewidth}
     \includegraphics[width=\linewidth]{#1}
     \end{minipage}  
       \caption{#2}
+      \label{#4}
   \end{figure}  
 }
 
+\newcommand{\thetab}{\boldsymbol\theta}
+\newcommand{\xb}{\mathbf{x}}
+\newcommand{\nb}{\mathbf{n}}
+\newcommand{\dt}{\mathrm{d}\mathbf{t}}
+\newcommand{\gau}[3]{\exp(-\frac{1}{2#3}(#1-#2 )^2}
+\newcommand{\wdist}[3]{\frac{1}{2#3}(#1-#2 )^2}
 \begin{document}
 % \renewcommand\thelinenumber{\color[rgb]{0.2,0.5,0.8}\normalfont\sffamily\scriptsize\arabic{linenumber}\color[rgb]{0,0,0}}
 % \renewcommand\makeLineNumber {\hss\thelinenumber\ \hspace{6mm} \rlap{\hskip\textwidth\ \hspace{6.5mm}\thelinenumber}}
@@ -215,17 +223,98 @@ An \textit{a contrario} method for patch comparing consists in controlling the p
 
 The model that we present here is inspired by the fact that high dimensional distribution of shapes can be seen as the tensor product of adequately chosen margin distribution. Here, we approximate these margin distribution by the patches basis deduced from a PCA (Principle Component Analysis). 
 
-A patch is modeled by a random variable $\rand{B}=\rand{C}_i \mat{B}_i$, a linear combination of reference patches, where $\rand{C}_i$ are independent random variable following a distribution $H_i$. Here, as we have explained above, the reference patches are the PCA basis, and $ H_i$ are their empirical histogram.
+A patch is modeled by a random variable $\rand{B}=\sum_i \rand{C}_i \mat{B}_i$, a linear combination of reference patches, where $\rand{C}_i$ are independent random variable following a distribution $H_i$. Here, as we have explained above, the reference patches are the PCA basis, and $ H_i$ are their empirical histogram.
 
 One should notice that the independence of $\rand{C}_i$ is just an approximation, they are only deccorelated in reality. We will show that this modeling is good approximation and much more adapted to natural images.
 
 \subsection{Model and Statistic}
 
 In this section, we will study the \textit{a contrario} model. Typically, we will study the dynamic of the margin distributions and try to understand how it helps us to build a efficient patch similarity criterion.
-\section{Likelihood Ratio with A Contrario Prior}
-\subsection{Model}
-\subsection{Studying}
+\insertTwoF{lena}{patches}{The first principle component patches for all the $7\times 7$ of the left image}{0.45}{lena_patches}
 
+We first observe that if the PCA is done on the global image, the patch basis tend to coincide with the cosine basis. This can be explained by the fact that natural images are mainly composed by low frequency.
+\insertTwoF{cosine_basis}{princomp_lena}{Left: the $7\times 7$ cosine basis; Right: all the principle component patches of lena, arranged by energy decreasing order.}{0.45}{cosb}
+\insertTwoF{lena_local}{patches_local}{The first principle component patches of a local zone of lena. }{0.45}{local}
+
+However, as Fig.\ref{local} shows, if the PCA is performed locally, we see that the basis remain still close to the cosine basis, but more local structures have been taken into account.
+
+Next, we will study the margin distributions of the these patches, namely the empirical histograms of $\rand{C}_i$.
+Fig. \ref{hist} shows the shape of these histograms, and we notice apart that the first histogram follows the pace of the image's global histogram, the other margin distributions belong to the same family of parametric distributions.  
+  \begin{figure}[!h]
+    \centering
+    \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=\linewidth]{h_1}
+    \end{minipage}
+    \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=\linewidth]{h_2}
+    \end{minipage}
+    \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=\linewidth]{h_3}
+    \end{minipage}
+    \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=\linewidth]{h_4}
+    \end{minipage}
+    \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=\linewidth]{h_5}
+    \end{minipage}
+    \begin{minipage}{0.3\linewidth}
+    \includegraphics[width=\linewidth]{h_6}
+    \end{minipage}
+      \caption{The empirical histogram of the first principle component patches;}
+      \label{hist}
+  \end{figure}  
+More precisely, Fig. \ref{para} proves that the laplace distributions fit these histograms very well. To summarizer, it is how we are simulating a image patch:
+\begin{itemize}
+ \item A PCA is performed to define the reference patches. (We can replace this step by a DCT).
+ \item Margin distributions are modeled by laplace distribution, or gaussian distribution. Parameters are learned using their maximum likelihood estimators.
+ \item Patches are simulated as $\rand{B}=\sum_i \rand{C}_i \mat{B}_i$ where $\rand{C}_i$ follows the margin distribution learned above.
+\end{itemize}
+
+\insertTwoF{h_2_gau}{h_4_gau}{In blue, the histograms of margin distributions; in red, the closest gaussian distribution in the sense of maximum likelihood; in green, the closest laplace distribution.}{0.45}{para}
+
+\section{Likelihood Ratio with A Contrario Prior}
+In this section, we combine the likelihood ration and the \textit{a contrario} prior model to build a statistic similarity criterion for patch comparison.
+\subsection{Model}
+First, we consider the classic noisy patch model. Let $\thetab$ be a noise free patch, distributed according to the \textit{a contrario} model. The observed patch $\xb$ is modeled by $\xb=\thetab + \nb$, where $\nb$ is a isotropic gaussian white noise, with $\sigma$ as standard deviation.  
+Let's recall the likelihood ratio expression:
+\begin{equation}
+ \mathcal{L}(\mathbf{x}_1,\mathbf{x}_2)=
+\frac{\int_{\mathbf{t \in \mathcal{R}^p}} p(\mathbf{x}_1|\boldsymbol{\theta}_{12}=\mathbf{t}) p(\mathbf{x}_2|\boldsymbol{\theta}_{12}=\mathbf{t})p(\boldsymbol{\theta}_{12}=\mathbf{t})\mathrm{d}\mathbf{t}}{\prod_{j=1,2}\int_{\mathbf{t \in \mathcal{R}^p}} p(\mathbf{x}_j|\boldsymbol{\theta}_{j}=\mathbf{t}) p(\boldsymbol{\theta}_{j}=\mathbf{t})\mathrm{d}\mathbf{t}}
+\label{like}
+\end{equation}
+Gaussian white noise implies that 
+\[
+p(\xb|\thetab)\propto\exp\left(\frac{|\mathbf{x}-\boldsymbol\theta|^2}{2\sigma^2}\right)
+\]
+As the gaussian noise is isotropic and the basis $(\mat{B}_i)_i$ is orthogonal, we can separate the $\exp$. Let's denote $\xb=\sum_i x_i \mat{B}_i$ and $\thetab=\sum_i c_i \mat{B}_i$
+\[
+p(\xb|\thetab)\propto \prod_i \exp(-\frac{(x_i-c_i )^2}{2\sigma^2})
+\]
+The \textit{a contrario} model gives,
+\[
+\begin{split}
+p(\thetab=\mathbf{t})\dt &=p(\thetab=\sum_i c_i \mat{B}_i) \prod \mathrm{d} c_i\\
+&=\prod_i H_i(c_i) \mathrm{d} c_i
+\end{split}
+\]
+Thus, Equ. \ref{like} can be computed along each dimension, namely:
+\begin{equation}
+ \mathcal{L}(\mathbf{x}_1,\mathbf{x}_2)=\prod_i \frac{\int_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,1}-c_i )^2 -\frac{1}{2\sigma^2}(x_{i,2}-c_i )^2) H_i(c_i) \mathrm{d} c_i }
+ {\prod_{j=1,2}\int_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,j}-c_i )^2) H_i(c_i) \mathrm{d} c_i }
+\end{equation}
+The integral can be computed analytically if we approximate $H_i$ by gaussian distributions (not for laplace). In general, this ratio 
+need to be computed using a differential schema for the integral, which is computationally expensive. In order to understand this approach, we focus on the a posteriori probability (MAP) ratio.
+\begin{equation}
+ \mathcal{P}_G (\mathbf{x}_1,\mathbf{x}_2)=\prod_i \frac{\sup_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,1}-c_i )^2 -\frac{1}{2\sigma^2}(x_{i,2}-c_i )^2) H_i(c_i)  }
+ {\prod_{j=1,2}\sup_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,j}-c_i )^2) H_i(c_i)  }
+\end{equation}
+
+\subsection{Studying}
+In this part, we will develop the calculus for $H_i$ gaussian with means $\mu_h$ and variance $\sigma_h^2$ (It is similar for the Laplace case, but a little more complicate). Without lost of generality, we only need to work on one component:
+\[
+ \mathcal{P}_G = \frac{\sup_{c\in \mathcal{R}} \exp(-\wdist{x_1}{c}{\sigma^2}-\wdist{x_2}{c}{\sigma^2}-\wdist{\mu_h}{c}{\sigma_h^2}) }
+{\sup_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,j}-c_i )^2) H_i(c_i)  }
+\]
 \section{Experiments}
 \subsection{Statistic Similarity for Non Local Means Denoising}
 \subsection{PFA-PTD Performance}
