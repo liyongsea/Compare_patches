@@ -26,14 +26,18 @@ dico=load('../../data/dico_for_gamma_L1.62.mat');
 dico=dico.dico;
 dico=dico/255;
 nb=size(dico,1);
-
-sigma=0.3;
+sigma=0.05;
+hf=figure(), showPatches(dico,6);
+saveas(hf,'dico','png');
+%%
 dico1=dico+randn(size(dico))*sigma;
 dico1(dico1<0)=0;
 dico1(dico1>1)=1;
 dico2=dico+randn(size(dico))*sigma;
 dico2(dico2<0)=0;
 dico2(dico2>1)=1;
+hf=figure, showPatches(dico2,6);
+saveas(hf,'dico_noise','png');
 %% compute the simalrity performance on different sigma
 M=[];% M is the correlation matrix
 figure,

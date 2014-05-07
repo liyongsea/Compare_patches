@@ -154,36 +154,23 @@
 \pagestyle{headings}
 \mainmatter
 \def\ECCV14SubNumber{979}  % Insert your submission number here
+\title{A Statistic Criterion For Patch Comparison}
 
+\titlerunning{Imagerie Satellitaire}
 
-\titlerunning{ECCV-14 submission ID \ECCV14SubNumber}
+\authorrunning{Imagerie Satellitaire}
 
-\authorrunning{ECCV-14 submission ID \ECCV14SubNumber}
-
-\author{Anonymous ECCV submission}
-\institute{Paper ID \ECCV14SubNumber}
+\author{Delans Theophile, LI Jia}
+\institute{Telecom ParisTech}
 
 
 \maketitle
 
-\begin{abstract}
-\end{abstract}
-
-
 \section{Introduction}
 
-<<<<<<< HEAD
-=======
 Comparing patches is an operation used in many domains of image processing. Many modern methods for image registration and stereo-vision reconstruction rely heavily on estimating how much two patches (small square blocks of pixels) are similar. Patches are also used for denoising. In this work, we try to find an efficient way to know if two different patches are similar. Dissimilarity between two patches may have two main causes; the first is intrinsic (two different objects) and the other one is due to noise. Thus, noise should be taken into account in our criteria to know if patches describe the same object or not. As noise and natural images have very different characteristics, it is possible to make use of these differences to build a criteria that automatically reduces the influence of noise.
 \\In section 2, we develop the likelihood ratio approach detailed by Deledalle et al. \cite{Deledalle:2012} in which we try to estimate a good statistic criterion for comparing two patches that takes into account independent noise in the patches. Then, we detail the \textit{a contrario} method, introduced by Sabater et al. \cite{Sabater:2012}, to learn a statistical distribution of the different patches. In section 4, we develop our method that uses this distribution as a prior for the likelihood ratio approach. We discuss our results and compare different methods in section 5.
 % CITE
-
->>>>>>> ac8eb90926f65ad455462ed73db6b134632305f2
-\subsection{Related Work}
-
-\subsection{Contributions}
-
-\subsection{Models and Notations}
 
 
 \section{Likelihood Ratio for Patch Comparison}
@@ -213,8 +200,6 @@ While the Bayesian likelihood ratio offers good theoretical properties, the comp
 \[
 \mathcal{L}_G(\mathbf{x}_1,\mathbf{x}_2)=\frac{\sup_{\mathbf{t}}p(\mathbf{x}_1,\mathbf{x}_2|\boldsymbol\theta_{12}=\mathbf{t}, \mathcal{H}_0)}{\sup_{\mathbf{t}_1,\mathbf{t}_2}p(\mathbf{x}_1,\mathbf{x}_2|\boldsymbol\theta_i=\mathbf{t}_i, \mathcal{H}_1)}
 \]
-\subsection{Statistic Criterion for Patch Comparison}
-\subsection{Likelihood Ratio and General Approach}
 
 \section{\textit{A Contrario} Model for Prior Learning}
 
@@ -306,19 +291,124 @@ The integral can be computed analytically if we approximate $H_i$ by gaussian di
 need to be computed using a differential schema for the integral, which is computationally expensive. In order to understand this approach, we focus on the a posteriori probability (MAP) ratio.
 \begin{equation}
  \mathcal{P}_G (\mathbf{x}_1,\mathbf{x}_2)=\prod_i \frac{\sup_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,1}-c_i )^2 -\frac{1}{2\sigma^2}(x_{i,2}-c_i )^2) H_i(c_i)  }
- {\prod_{j=1,2}\sup_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,j}-c_i )^2) H_i(c_i)  }
+ {\prod_{j=1,2}\sup_{c_{i,j}\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,j}-c_{i,j} )^2) H_i(c_{i,j})  }
 \end{equation}
 
 \subsection{Studying}
 In this part, we will develop the calculus for $H_i$ gaussian with means $\mu_h$ and variance $\sigma_h^2$ (It is similar for the Laplace case, but a little more complicate). Without lost of generality, we only need to work on one component:
 \[
- \mathcal{P}_G = \frac{\sup_{c\in \mathcal{R}} \exp(-\wdist{x_1}{c}{\sigma^2}-\wdist{x_2}{c}{\sigma^2}-\wdist{\mu_h}{c}{\sigma_h^2}) }
-{\sup_{c_i\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_{i,j}-c_i )^2) H_i(c_i)  }
+ \mathcal{P}_{G_i} = \frac{\sup_{c\in \mathcal{R}} \exp(-\wdist{x_1}{c}{\sigma^2}-\wdist{x_2}{c}{\sigma^2}-\wdist{\mu_h}{c}{\sigma_h^2}) }
+{\prod_{j=1,2}\sup_{c_j\in \mathcal{R}} \exp(-\frac{1}{2\sigma^2}(x_j-c_j )^2-\wdist{\mu_h}{c_j}{\sigma_h^2})  }
 \]
+Where, $\mathcal{P}_{G_i}$ denote the a posteriori ratio for the $i$th component. The optimal $c, c_j$ can be computed easily (quadratic form), and finally we have:
+\begin{equation}
+ -\log \mathcal{P}_{G_i}= C_i [ (x_{1,i}-x_{2,i})^2 -2b_i(x_{1,i}-\mu_{h_i})(x_{2,i}-\mu_{h_i})]
+ \label{for1}
+\end{equation}
+where,
+\[b_i=(\frac{\sigma}{\sigma_{h_i}})^2\text{, }C_i=\frac{1}{2\sigma^2(1+b_i)(2+b_i)}\]
+\insertF{curve}{The behavior of the proposed distance (c.f. \ref{for1}) versus the euclidian distance. We fix a coefficient $x_1=0.5$ and we draw $y=dist(x_1,x_1+t)$}{0.8}{curv}. In red we have the euclidian distance, and in blue, the proposed distance under different values of parameter $b_i$.
+Fig. \ref{curv} shows the behavior of the proposed distance. We can interpret the formula (\ref{for1}) as following:
+\begin{itemize}
+ \item The term $C_i$ gives the weighting for different component according to the noise level ($\sigma$) and the margin of the component ($\sigma_{h_i}$).
+ \item The proposed distance is almost a euclidian distance, penalized by the deviation of the coefficient $x_1$, $x_2$ from the mean value $\mu$. More precisely, if both $x_1>\mu$ and $x_2>\mu$ (\textit{resp.} $x_i<\mu$) the distance is reduced, and the more $x_1$ and $x_2$ are far from $\mu$, the closer they are. It means the proposed distance favor rare patches for similarity.
+ \item On the other hand, if $x_1-\mu$ and $x_2-\mu$ are different sign, a penalization is add to the euclidian distance. 
+\end{itemize}
+This gives us a rough idea of the behavior of our criterion respected to the euclidian distance. It would have been more interesting to study the laplacian prior of the background model, in which case we are conducted to study $\inf_c (x-c)^2+b|\mu-c|$, which has a similar behavior to a soft thresholding (to be continued). 
+
+In the next section, we conceive two kind of experience in order to test the performance of the proposed similarity criterion.
+
 \section{Experiments}
+In this section we aim to test the performance of the proposed similarity criterion. In a first time, we use our method to match patch in a patch dictionary, and compare its \textbf{ROC} curve (Receiver operating characteristic) to the euclidian distance. Secondly, we modify the non-local means denoising method by using our proposed criterion to check out both the PSNR and visual performance.
+\subsection{ROC Curve Performance}
+The ROC curve illustrates the performance of a similar criterion as its discrimination threshold is varied. For this, we match noisy patches from a fixed dictionary by using our similarity criterion, and draw the PFA-PTD curve. 
+\begin{itemize}
+ \item PFA, probability of false alarm, is the probability to decide $\mathcal{H}_1$ under $\mathcal{H}_0$.
+ \item PTD, probability of true detection, is the probability to decide $\mathcal{H}_1$ under $\mathcal{H}_1$.
+\end{itemize}
+
+We use the same patch dictionary as Deledalle \textit{et al.}\cite{Deledalle:2012} (Fig. \ref{dico}). The experience consists in matching two noisy versions of this dictionary and evaluate the similarity criterion used for the matching. Typically we are going to compare the performance of our method with the euclidian distance. 
+\insertTwoF{dico}{dico_noise}{Left, the patch dictionary proposed by Deledalle \textit{et al.}\cite{Deledalle:2012}; right, the noisy version that we used for matching}{0.45}{dico}
+The proposed method need a prior learning step and one parameter $\sigma$ for the likelihood term, so we are going to show the performance under the change of these conditions.
+  \begin{figure}[!h]
+    \centering
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{zebra}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{perf_zebra_max}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{texture}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{perf_texture_max}
+    \end{minipage}
+      \caption{Left: the image used for prior learning; right:  the ROC performance of our method (in multi colors for different $\sigma$) versus the euclidian distance (in red)}
+      \label{perf}
+  \end{figure}  
+Fig.\ref{perf} illustrates the performance of our method versus the euclidian distance. First of all, our method is significant better than the euclidian distance. Secondly, a noise of 75 standard deviation is added, and the best performance is obtained by setting $\sigma=32$ in the proposed method. And we observe under different $\sigma$ the best performance is always obtained by setting $\hat \sigma=\frac{1}{2} \sigma$, where $\hat \sigma$ is the parameter in our model and $\sigma$ is the real noise deviation. 
+Finally, as we expected, if the prior is learned from a gaussian white noise image, we get the same performance as the euclidian distance. (Fig. \ref{wn})
+\insertTwoF{wn}{perf_wn_max}{The performance of the proposed method using a white noise prior.}{0.45}{wn}
 \subsection{Statistic Similarity for Non Local Means Denoising}
-\subsection{PFA-PTD Performance}
+We implement the classic non local means denoising method \cite{Buades:2005} by changing the weighting function. Given a reference patch $\mat{B}_r$, \cite{Buades:2005} propose to weight the patches in a sub window centered on $\mat{B}_r$ according to their euclidian distance $D_j=\lVert \mat{B}_r- \mat{B}_j \rVert^2$. The non-local mean filter compute a denoised patch $\tilde{\mat{B}}_r$ as
+\begin{equation}
+ \tilde{\mat{B}}_r=\sum_j K_j \mat{B}_j
+\end{equation}
+where the weights $K$ are computed as
+\[
+K_j=\frac{\tilde{K_j}}{\sum_j \tilde{K_j}}\text{, and  } \tilde{K_j}=\exp(-\frac{1}{2\tau^2} D_j)
+\]
+where $\tau$ is a parameter of the model.
+
+To illustrate the performance of the proposed criterion, we only need to switch the euclidian distance to the $-\log \mathcal{P}_{G}$, by defining:
+\[
+\tilde{D}_j=-\log \mathcal{P}_{G}(\mat{B}_r,\mat{B}_j)
+\]
+
+  \begin{figure}[!h]
+    \centering
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{hat_origine}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{hat_noisy}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{hat_eucli}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{hat_our}
+    \end{minipage}
+      \caption{Top right: the origin image; Top left: noisy image with $\sigma=15$; Bottom left: denoising with classic NL means,$PSNR=20.5$; Bottom right: denoising with our NL means, $PSNR=22.8$;}
+      \label{lena_de}
+  \end{figure}  
+  
+  \begin{figure}[!h]
+    \centering
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{byzh_origine}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{byzh_noisy}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{byzh_eucli}
+    \end{minipage}
+    \begin{minipage}{0.45\linewidth}
+    \includegraphics[width=\linewidth]{byzh_our}
+    \end{minipage}
+      \caption{Top right: the origin image; Top left: noisy image with $\sigma=15$; Bottom left: denoising with classic NL means,$PSNR=20.6$; Bottom right: denoising with our NL means, $PSNR=24.5$;}
+      \label{byzh_de}
+  \end{figure}  
 \section{Conclusion}
+
+In this project, we have combined the \textit{a contrario} model and the likelihood ratio to give a new statistic patch comparison criterion. We evaluate its performance by drawing its ROC curve and inserting it into a classic NL means denoising algorithm. We see that in both case, we beat the euclidian distance. For the futur, the next things should be done:
+\begin{enumerate}
+ \item Studying the case of laplacian prior and evaluating the performance.
+ \item Finding out how to fix automatically the parameters.
+ \item Comparing to more sophisticates patch similarity criterion, such as the one proposed by \cite{Dabov:2006}, used in the BM3D algorithm (a hard thresholding distance in a linear transformed domain, DFT, DCT), trying to generalizing the our method. 
+\end{enumerate}
 
 \newpage
 

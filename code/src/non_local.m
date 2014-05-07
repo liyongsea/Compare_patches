@@ -54,7 +54,7 @@ for i=1:16
 end
 
 %% dimension reduction
-d = 5;
+d = 30;
 resh = @(P)reshape(P, [n*n w1*w1])';
 remove_mean = @(Q)Q - repmat(mean(Q), [w1*w1 1]);
 P1 = remove_mean(resh(P));
@@ -89,11 +89,13 @@ q = 14;
 selection = @(i){clamp(i(1)-q:i(1)+q, 1,n), clamp(i(2)-q:i(2)+q,1,n)};
 distance = @(i,sel)sum( (H(sel{1},sel{2},:) - repmat(H(i(1),i(2),:), ...
         [length(sel{1}) length(sel{2}) 1])).^2, 3 )/(w1*w1);
+%     distance = @(i,sel)sum( abs(H(sel{1},sel{2},:) - repmat(H(i(1),i(2),:), ...
+%         [length(sel{1}) length(sel{2}) 1])), 3 )/(w1*w1);
 distance = @(i)distance(i,selection(i));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
 D = distance(i);
 K = kernel(i,tau);
-clf;
+clf; 
 imageplot(D, 'D', 1,2,1);
 imageplot(K, 'K', 1,2,2);
 %%
@@ -103,7 +105,7 @@ NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
 h=[];
 it=1;
-tau_list=0.004:0.002:0.015;
+tau_list=0.01:0.02:0.15;
 mySNR=[];
 for tau=tau_list
 %tau = .06;
@@ -116,15 +118,16 @@ title('SNR_tau');
 
 %%
 [snr_min,ind_opt]=max(mySNR);
-tau_list=0.004:0.002:0.015;
-for ind=1:length(tau_list)
+%tau_list=0.004:0.002:0.015;
+%for ind=1:length(tau_list)
+ind=2;
 tau_opt=tau_list(ind);
 h_opt=h(:,:,ind);
 hf=figure(155),imshow(h_opt)
 title(sprintf('SNR %f',snr(f0,h_opt)))
 set(gca,'position',[0 0 1 1],'units','normalized')
 saveas(hf,sprintf('%s/%s/eucli_reduc5_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,h_opt)),'png');
-end
+%end
 %%
 ind=6;
 figure(),imageplot(h(:,:,ind))
@@ -155,7 +158,7 @@ perm=@(k)permute(k,[2 3 1]);
 distance = @(i)-perm(sum(bsxfun(compare_sim, J ,J(:,i(1),i(2)))));
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
-tau = 4;
+tau = 8;
 %i = [83 72];
 i = [95 70];
 D = distance(i);
@@ -184,7 +187,7 @@ NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
 g=zeros(n,n);
 g_list=[];
-tau_list=3:0.2:4.5;
+tau_list=5:0.2:7;
 it=1;
 mySNR=[];
 for tau = tau_list
