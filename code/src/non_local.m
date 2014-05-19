@@ -9,20 +9,20 @@ n = 128;
 c = [120 200];
 f0=double(rgb2gray(imread('../../data/byzh.jpg')))./255;
 f0=imresize(f0,0.5);
-%f0 = load_image('lena');
+% f0 = load_image('lena');
 f0 = rescale( crop(f0,n, c) );
 hf=figure(101);
 imageplot(f0);
-set(gca,'position',[0 0 1 1],'units','normalized')
-saveas(hf,sprintf('%s/origine',experience),'png');
+% set(gca,'position',[0 0 1 1],'units','normalized')
+% saveas(hf,sprintf('%s/origine',experience),'png');
 
 %% add noise
-sigma = .05;
+sigma = 0.1;
 f = f0 + randn(n,n)*sigma;
 hf=figure(202);
 imageplot(clamp(f));
-set(gca,'position',[0 0 1 1],'units','normalized')
-saveas(hf,sprintf('%s/%s/noisy',experience,experience_noise),'png');
+% set(gca,'position',[0 0 1 1],'units','normalized')
+% saveas(hf,sprintf('%s/%s/noisy',experience,experience_noise),'png');
 
 %% 
 figure(),
@@ -44,7 +44,7 @@ X(X>n) = 2*n-X(X>n); Y(Y>n) = 2*n-Y(Y>n);
 
 patch = @(f)f(X + (Y-1)*n);%Patch extractor operator
 
-P = patch(f);
+P = patch(f0);
 
 clf;
 for i=1:16
@@ -54,7 +54,7 @@ for i=1:16
 end
 
 %% dimension reduction
-d = 5;
+d = 30;
 resh = @(P)reshape(P, [n*n w1*w1])';
 remove_mean = @(Q)Q - repmat(mean(Q), [w1*w1 1]);
 P1 = remove_mean(resh(P));
@@ -75,7 +75,7 @@ H = descriptor(f);
 %%
 distance = @(i)sum( (H - repmat(H(i(1),i(2),:), [n n 1])).^2, 3 )/(w1*w1);
 normalize = @(K)K/sum(K(:));
-kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
+kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) )/tau );
 tau = .08;
 %i = [83 72];
 i=[73 76];
@@ -85,15 +85,17 @@ figure(55),
 imageplot(D, 'D', 1,2,1);
 imageplot(K, 'K', 1,2,2);
 %% NL filter
-q = 14;
+q = 15;
 selection = @(i){clamp(i(1)-q:i(1)+q, 1,n), clamp(i(2)-q:i(2)+q,1,n)};
 distance = @(i,sel)sum( (H(sel{1},sel{2},:) - repmat(H(i(1),i(2),:), ...
         [length(sel{1}) length(sel{2}) 1])).^2, 3 )/(w1*w1);
+%     distance = @(i,sel)sum( abs(H(sel{1},sel{2},:) - repmat(H(i(1),i(2),:), ...
+%         [length(sel{1}) length(sel{2}) 1])), 3 )/(w1*w1);
 distance = @(i)distance(i,selection(i));
-kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
+kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) )/tau );
 D = distance(i);
 K = kernel(i,tau);
-clf;
+clf; 
 imageplot(D, 'D', 1,2,1);
 imageplot(K, 'K', 1,2,2);
 %%
@@ -101,9 +103,36 @@ NLval = @(K,sel)sum(sum(K.*f(sel{1},sel{2})));
 NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 [Y,X] = meshgrid(1:n,1:n);
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
+h=NLmeans(0.011);
+figure,imageplot(h)
+%%
+
+P3=reshape(patch(f),n,n,w1*w1);
+NLval_P = @(K,sel)sum(sum(repmat(K,[1,1,size(P3,3)]).*P3(sel{1},sel{2},:,:)));
+NLval_P = @(i,tau)NLval_P( kernel(i,tau), selection(i) );
+tau_list=0.01;
+it=1;
+mySNR=[];
+for tau=0.015
+h=zeros(size(P));
+    for i=1:n
+        if (mod(i,10)==1)
+            fprintf('tau = %f, %f persent finished\n\r',tau,i/128*100)
+        end
+        for j=1:n
+            h(i,j,:)=NLval_P([i,j],tau);
+        end
+    end
+    h_list(:,:,it)=aggregation(h,7);
+    mySNR(it)=snr(f0,h_list(:,:,it));
+    it=it+1;
+end
+figure(),plot(tau_list,mySNR,'LineWidth',3);
+title('SNR_tau');
+%%
 h=[];
 it=1;
-tau_list=0.004:0.002:0.015;
+tau_list=0.01:0.02:0.15;
 mySNR=[];
 for tau=tau_list
 %tau = .06;
@@ -116,19 +145,25 @@ title('SNR_tau');
 
 %%
 [snr_min,ind_opt]=max(mySNR);
-tau_list=0.004:0.002:0.015;
-for ind=1:length(tau_list)
-tau_opt=tau_list(ind);
-h_opt=h(:,:,ind);
+%tau_list=0.004:0.002:0.015;
+%for ind=1:length(tau_list)
+ind=2;
+tau_opt=tau_list(ind_opt);
+h_opt=h(:,:,ind_opt);
 hf=figure(155),imshow(h_opt)
 title(sprintf('SNR %f',snr(f0,h_opt)))
-set(gca,'position',[0 0 1 1],'units','normalized')
-saveas(hf,sprintf('%s/%s/eucli_reduc5_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,h_opt)),'png');
-end
+% set(gca,'position',[0 0 1 1],'units','normalized')
+% saveas(hf,sprintf('%s/%s/eucli_reduc5_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,h_opt)),'png');
+%end
 %%
 ind=6;
 figure(),imageplot(h(:,:,ind))
 title(sprintf('SNR %f',snr(f0,h(:,:,ind))))
+
+
+
+
+
 %% my similarity for NL denoising
 % learn by PCA
 [patches_principle,coeff_proj]=princomp(resh(patch(f))');
@@ -155,7 +190,7 @@ perm=@(k)permute(k,[2 3 1]);
 distance = @(i)-perm(sum(bsxfun(compare_sim, J ,J(:,i(1),i(2)))));
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
-tau = 4;
+tau = 8;
 %i = [83 72];
 i = [95 70];
 D = distance(i);
@@ -184,7 +219,7 @@ NLval = @(i,tau)NLval( kernel(i,tau), selection(i) );
 NLmeans = @(tau)arrayfun(@(i1,i2)NLval([i1 i2],tau), X,Y);
 g=zeros(n,n);
 g_list=[];
-tau_list=3:0.2:4.5;
+tau_list=5:0.2:7;
 it=1;
 mySNR=[];
 for tau = tau_list
