@@ -148,12 +148,21 @@ title('SNR_tau');
 %tau_list=0.004:0.002:0.015;
 %for ind=1:length(tau_list)
 ind=2;
+<<<<<<< HEAD
 tau_opt=tau_list(ind_opt);
 h_opt=h(:,:,ind_opt);
 hf=figure(155),imshow(h_opt)
 title(sprintf('SNR %f',snr(f0,h_opt)))
 % set(gca,'position',[0 0 1 1],'units','normalized')
 % saveas(hf,sprintf('%s/%s/eucli_reduc5_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,h_opt)),'png');
+=======
+tau_opt=tau_list(ind);
+h_opt=h(:,:,ind);
+hf=figure(155),imshow(h_opt)
+title(sprintf('SNR %f',snr(f0,h_opt)))
+set(gca,'position',[0 0 1 1],'units','normalized')
+saveas(hf,sprintf('%s/%s/eucli_reduc5_tau%g_SNR%g',experience,experience_noise,tau_opt,snr(f0,h_opt)),'png');
+>>>>>>> 5a0d7a55716530789aebf7704aa3f7921edcafc6
 %end
 %%
 ind=6;
