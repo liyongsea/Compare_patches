@@ -1,12 +1,12 @@
-close all
-clear all
+% close all
+% clear all
 
 %% patches in images
 
 experience='../../results/byzh';%set path to save images
 experience_noise='noise_05';
-n = 128;
-c = [100 200];
+n = 50;
+c = [60 260];
 % f0=double(rgb2gray(imread('../../data/byzh.jpg')))./255;
 % f0=imresize(f0,0.5);
 f0 = load_image('lena');
@@ -82,7 +82,7 @@ distance = @(i)sum(C.*((H-repmat(H(i(1),i(2),:), [n n 1])).^2-2*b.*(H-mu).*(repm
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
 tau = 3;
-i = [83 72];
+i = [83 72]-58;
 % i = [95 70];
 D = distance(i);
 K = kernel(i,tau);
@@ -112,7 +112,7 @@ imageplot(K, 'K', 1,2,2);
 P3=reshape(patch(f),n,n,w1*w1);
 NLval_P = @(K,sel)sum(sum(repmat(K,[1,1,size(P3,3)]).*P3(sel{1},sel{2},:,:)));
 NLval_P = @(i,tau)NLval_P( kernel(i,tau), selection(i) );
-tau_list=[2.5:0.2:3];
+tau_list=[0.5:0.5:4];
 it=1;
 mySNR=[];
 gna_list=[];
@@ -135,35 +135,43 @@ end
 figure(),plot(tau_list,mySNR,'LineWidth',3);
 title('SNR_tau');
 %%
+mySNR_w=[];
+for i=1:length(tau_list)
+    mySNR_w(i)=snr(f0,gna_list(:,:,i));  
+end
+
+hold on,plot(tau_list,mySNR_w,'-r','LineWidth',3);
+title('SNR_tau');
+%%
 [snr_min,ind_opt]=max(mySNR);
 %tau_list=0.004:0.002:0.015;
 %for ind=1:length(tau_list)
 ind=ind_opt;
 tau_opt=tau_list(ind);
 g_opt=g_list(:,:,ind);
-hf=figure(155),imshow(g_opt)
+hf=figure(155),imageplot(g_opt)
 title(sprintf('SNR %f',snr(f0,g_opt)))
 
 %%
-
-options.k = 2;          % half size for the windows
-options.T = 0.06;       % width of the gaussian, relative to max(M(:))  (=1 here)
-options.max_dist = 15;  % search width, the smaller the faster the algorithm will be
-options.ndims = 30;     % number of dimension used for distance computation (PCA dim.reduc. to speed up)
-options.do_patchwise = 1;
-
-%%
-it=1;
-mySNR_h=[];
-h_list=[];
-t_list=0.05:0.01:0.05;
-for t=t_list
-    option.T=t;
-    [M1,Wx,Wy] = perform_nl_means(f, options);
-    mySNR_h(it)=snr(f0,M1);
-    h_list(:,:,it)=M1;
-    it=it+1;
-end
-
-figure(),plot(t_list,mySNR_h,'LineWidth',3);
-title('SNR_tau_P');
+% 
+% options.k = 2;          % half size for the windows
+% options.T = 0.06;       % width of the gaussian, relative to max(M(:))  (=1 here)
+% options.max_dist = 15;  % search width, the smaller the faster the algorithm will be
+% options.ndims = 30;     % number of dimension used for distance computation (PCA dim.reduc. to speed up)
+% options.do_patchwise = 1;
+% 
+% %%
+% it=1;
+% mySNR_h=[];
+% h_list=[];
+% t_list=0.05:0.01:0.05;
+% for t=t_list
+%     option.T=t;
+%     [M1,Wx,Wy] = perform_nl_means(f, options);
+%     mySNR_h(it)=snr(f0,M1);
+%     h_list(:,:,it)=M1;
+%     it=it+1;
+% end
+% 
+% figure(),plot(t_list,mySNR_h,'LineWidth',3);
+% title('SNR_tau_P');

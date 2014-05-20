@@ -5,17 +5,18 @@ rng('default');
 %%
 dataPath='../../data/%s';
 %I=imread('/home/li/MVA/Graphcut_shadow/data/toulouse1_qb.gif');
-I=imread(sprintf(dataPath,'zebra.jpg'));
-I=rgb2gray(I);
+% I=imread(sprintf(dataPath,'zebra.jpg'));
+I= load_image('lena');
+% I=rgb2gray(I);
 %I=imresize(I,0.5);
-I=double(I)/255;
-I=0.5+randn(size(I));
-n = 208;
-c = [120 200];
-% I = rescale( crop(I,n, c) );
+% I=double(I)/255;
+% I=0.5+randn(size(I));
+n = 128;
+c = [100 200];
+I = rescale( crop(I,n, c) );
 hf=figure(),imshow(I);
-set(gca,'position',[0 0 1 1],'units','normalized')
-saveas(hf,'wn','png');
+% set(gca,'position',[0 0 1 1],'units','normalized')
+% saveas(hf,'wn','png');
 %% extract patches
 p_size=7; %odd
 patches=extractPatches(I,p_size*p_size);
@@ -25,19 +26,21 @@ showPatches(patches_principle,4);
 saveas(21,'patches','png');
 %% distribution of the first components
 hf=figure,
-for i=1:6
-subplot(2,3,i) 
+it=1;
+for i=35:40
+subplot(2,3,it) 
 hist(coeff_proj(:,i),255)
+it=it+1;
 end
 %set(gca,'position',[0 0 1 1],'units','normalized')
-saveas(hf,'hist','png');
+% saveas(hf,'hist','png');
 %% approximate the hist distribution by a gaussian
-pi=6;
+pi=35;
 Y=coeff_proj(:,pi);
 Z=patches_principle(:,pi);
 m=estimateGaussian(Y);
 l=estimateLaplace(Y);
-x=[-2:0.01:2]';
+x=[-0.5:0.01:0.5]';
 hf=figure,[h1,c1]=hist(Y,255)
 hold on,plot(c1,h1./trapz(c1,h1),'-b','LineWidth',2)
 saveas(hf,sprintf('h_%d',pi),'png');

@@ -5,11 +5,11 @@ clear all
 
 experience='../../results/byzh';%set path to save images
 experience_noise='noise_05';
-n = 50;
-c = [60 260];
-% f0=double(rgb2gray(imread('../../data/byzh.jpg')))./255;
-% f0=imresize(f0,0.5);
-f0 = load_image('lena');
+n = 128;
+c = [120 200];
+f0=double(rgb2gray(imread('../../data/byzh.jpg')))./255;
+f0=imresize(f0,0.5);
+% f0 = load_image('lena');
 f0 = rescale( crop(f0,n, c) );
 hf=figure(101);
 imageplot(f0);
@@ -52,33 +52,59 @@ for i=1:16
     y = floor( rand*(n-1)+1 );
     imageplot( squeeze(P(x,y,:,:)), '', 4,4,i );
 end
-%%
+%% learn for L1
 resh = @(P)reshape(P, [n*n w1*w1])';
 [patches_principle,coeff_proj]=princomp(resh(patch(f0))');
 figure,showPatches(patches_principle);
 resolution=255;
 priorModel_lap=estimateLaplace(coeff_proj);
-para.sigma=1*sigma;
+para1.sigma=1*sigma;
+para2.sigma=1*sigma;
+%% learn for L2
+[patches_principle,coeff_proj]=princomp(resh(patch(f0))');
+figure,showPatches(patches_principle);
+resolution=255;
+[mu var]=estimGaussianCom(coeff_proj);
+priorModel_gau.mu=mu;
+priorModel_gau.var=var;
 %%
 iresh = @(P)reshape(P, [n,n w1*w1]);
 [patches_principle,coeff_proj]=princomp(resh(patch(f))');
 H=iresh(coeff_proj);
-%%
+a=2;
+H1=H(:,:,1:a);
+H2=H(:,:,a+1:end);
+%% L1 para
 vresh =@(m) reshape(m,1,1,[]);
-priorModel_lap.b=vresh(priorModel_lap.b);
-priorModel_lap.mu=vresh(priorModel_lap.mu);
-priorModel_lap.lambda=(para.sigma^2)./priorModel_lap.b;
+tronc1= @(m) m(:,:,1:a);
+tronc2= @(m) m(:,:,a+1:end);
+priorModel_lap.b=tronc1(vresh(priorModel_lap.b));
+priorModel_lap.mu=tronc1(vresh(priorModel_lap.mu));
+priorModel_lap.lambda=(para1.sigma^2)./priorModel_lap.b;
 priorModel_lap.lambda(1)=0;
 h=@(c,lambda)0.5*c.^2.*(abs(c)<=lambda)+(abs(c)>lambda).*(0.5*lambda.^2+lambda.*(abs(c)-lambda));
+%% L2 para
 
-% compare_sim=@(p,q)1/para.sigma^2*sum(0.25*(p-q).^2+2*h((p+q)/2-priorModel_lap.mu,priorModel_lap.lambda/2)-h(p-priorModel_lap.mu,priorModel_lap.lambda)-h(q-priorModel_lap.mu,priorModel_lap.lambda),3);
+priorModel_gau.vt=tronc2(vresh(priorModel_gau.var));
+priorModel_gau.mt=tronc2(vresh(priorModel_gau.mu));
+priorModel_gau.gamma=(para2.sigma^2)./priorModel_gau.vt;
+
+priorModel_gau.C=1./(2*para2.sigma^2*(1+priorModel_gau.gamma).*(2+priorModel_gau.gamma));
 %% mesure the similarity of one patch on all image
+% L1 dist
 repm=@(b)repmat(b,[n,n,1]);
-b=repm(priorModel_lap.b);
 mu=repm(priorModel_lap.mu);
 lambda=repm(priorModel_lap.lambda);
-compare_sim=@(p,q)1/para.sigma^2*sum(0.25*(p-q).^2+2*h((p+q)/2-mu,lambda/2)-h(p-mu,lambda)-h(q-mu,lambda),3);
-distance = @(i)compare_sim(H,repm(H(i(1),i(2),:)));
+compare_sim1=@(p,q)1/para1.sigma^2*sum(0.25*(p-q).^2+2*h((p+q)/2-mu,lambda/2)-h(p-mu,lambda)-h(q-mu,lambda),3);
+distance1 = @(i)compare_sim1(H1,repm(H1(i(1),i(2),:)));
+% L2 dist
+gamma=repm(priorModel_gau.gamma);
+C=repm(priorModel_gau.C);
+m=repm(priorModel_gau.mt);
+compare_sim2=@(p,q)sum(C.*((p-q).^2-2*gamma.*(p-m).*(q-m)),3);
+distance2 = @(i)compare_sim2(H2,repm(H2(i(1),i(2),:)));
+
+distance= @(i) distance1(i)+distance2(i);
 normalize = @(K)K/sum(K(:));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) ) );
 tau = 3;
@@ -92,17 +118,24 @@ imageplot(K, 'K', 1,2,2);
 %% NL filter
 
 q = 15;
+% L1
 repm=@(b)repmat(b,[2*q+1,2*q+1,1]);
-b=repm(priorModel_lap.b);
 mu=repm(priorModel_lap.mu);
 lambda=repm(priorModel_lap.lambda);
-compare_sim=@(p,q)1/para.sigma^2*sum(0.25*(p-q).^2+2*h((p+q)/2-mu,lambda/2)-h(p-mu,lambda)-h(q-mu,lambda),3);
+compare_sim1=@(p,q)1/para1.sigma^2*sum(0.25*(p-q).^2+2*h((p+q)/2-mu,lambda/2)-h(p-mu,lambda)-h(q-mu,lambda),3);
 
 selection = @(i){clamp(i(1)-q:i(1)+q, 1,n), clamp(i(2)-q:i(2)+q,1,n)};
-distance = @(i,sel)compare_sim(H(sel{1},sel{2},:),repm(H(i(1),i(2),:)));
+distance1 = @(i,sel)compare_sim1(H1(sel{1},sel{2},:),repm(H1(i(1),i(2),:)));
 %     distance = @(i,sel)sum( abs(H(sel{1},sel{2},:) - repmat(H(i(1),i(2),:), ...
 %         [length(sel{1}) length(sel{2}) 1])), 3 )/(w1*w1);
-distance = @(i)distance(i,selection(i));
+% L2
+gamma=repm(priorModel_gau.gamma);
+C=repm(priorModel_gau.C);
+m=repm(priorModel_gau.mt);
+compare_sim2=@(p,q)sum(C.*((p-q).^2-2*gamma.*(p-m).*(q-m)),3);
+distance2 = @(i,sel)compare_sim2(H2(sel{1},sel{2},:),repm(H2(i(1),i(2),:)));
+
+distance = @(i)distance1(i,selection(i))+distance2(i,selection(i));
 kernel = @(i,tau)normalize( exp( -distance(i)/(2*tau^2) )/tau );
 D = distance(i);
 K = kernel(i,tau);
